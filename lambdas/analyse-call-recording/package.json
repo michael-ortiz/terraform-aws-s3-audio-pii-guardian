@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && rm -rf Archive.zip && zip -r Archive.zip .",
     "watch": "tsc -w"
   },
   "dependencies": {

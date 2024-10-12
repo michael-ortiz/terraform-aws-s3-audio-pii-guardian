@@ -29,7 +29,7 @@ export const handler = async (event: any, context: any) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text: `PII detected in Call Recording: **${sanitizedKey2}**. \n\nBucket: **${s3_bucket}**` })
+      body: JSON.stringify({ text: `PII detected in Call Recording: *${sanitizedKey2}*. \n\nBucket: *${s3_bucket}*` })
     }).catch((err) => {
       console.error("Error sending notification to Slack", err);
     } );

@@ -31,7 +31,7 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: `PII detected in Call Recording: **${sanitizedKey2}**. \n\nBucket: **${s3_bucket}**` })
+            body: JSON.stringify({ text: `PII detected in Call Recording: *${sanitizedKey2}*. \n\nBucket: *${s3_bucket}*` })
         }).catch((err) => {
             console.error("Error sending notification to Slack", err);
         });
