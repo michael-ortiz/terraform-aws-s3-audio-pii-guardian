@@ -18,7 +18,7 @@ export const handler = async (event: any, context: any) => {
 
   // Set the parameters
   const params : StartTranscriptionJobCommandInput = {
-    TranscriptionJobName: sanitizedKey,
+    TranscriptionJobName: uuidv4(),
     LanguageCode: "en-US", // For example, 'en-US'
     MediaFormat: "wav",
     Media: {

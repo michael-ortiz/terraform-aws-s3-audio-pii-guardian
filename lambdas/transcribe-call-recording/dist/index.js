@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handler = void 0;
 const client_transcribe_1 = require("@aws-sdk/client-transcribe");
+const uuid_1 = require("uuid");
 const transcribeClient = new client_transcribe_1.TranscribeClient({ region: 'us-east-1' });
 const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
     const s3_bucket = event.Records[0].s3.bucket.name;
@@ -21,7 +22,7 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
     const sanitizedKey = s3_key.replace(/\.[^/.]+$/, "");
     // Set the parameters
     const params = {
-        TranscriptionJobName: sanitizedKey,
+        TranscriptionJobName: (0, uuid_1.v4)(),
         LanguageCode: "en-US", // For example, 'en-US'
         MediaFormat: "wav",
         Media: {
