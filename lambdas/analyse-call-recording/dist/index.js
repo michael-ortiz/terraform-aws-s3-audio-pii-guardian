@@ -23,12 +23,13 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
     const bodyContents = yield streamToString(data.Body);
     if (bodyContents.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG)) {
         console.log("PII detected in", s3_key);
+        const sanitizedKey = s3_key.replace("redacted-", '');
         yield fetch(process.env.SLACK_NOTIFICATIONS_WEBHOOK, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: `PII detected in bucket ${s3_bucket}, key ${s3_key}` })
+            body: JSON.stringify({ text: `PII detected in bucket ${s3_bucket}, key ${sanitizedKey}` })
         });
     }
     return null;

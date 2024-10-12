@@ -19,12 +19,14 @@ export const handler = async (event: any, context: any) => {
 
     console.log("PII detected in", s3_key);
 
+    const sanitizedKey = s3_key.replace("redacted-", '');
+
     await fetch(process.env.SLACK_NOTIFICATIONS_WEBHOOK!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text: `PII detected in bucket ${s3_bucket}, key ${s3_key}` })
+      body: JSON.stringify({ text: `PII detected in bucket ${s3_bucket}, key ${sanitizedKey}` })
     });
   }
 

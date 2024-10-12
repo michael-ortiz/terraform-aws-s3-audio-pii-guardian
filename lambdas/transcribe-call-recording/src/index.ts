@@ -13,18 +13,19 @@ export const handler = async (event: any, context: any) => {
 
   const s3Uri = `s3://${s3_bucket}/${s3_key}`
 
-  const jobId = uuidv4();
+  // Remove the file extension from the key
+  const sanitizedKey = s3_key.replace(/\.[^/.]+$/, "")
 
   // Set the parameters
   const params : StartTranscriptionJobCommandInput = {
-    TranscriptionJobName: jobId,
+    TranscriptionJobName: sanitizedKey,
     LanguageCode: "en-US", // For example, 'en-US'
     MediaFormat: "wav",
     Media: {
       MediaFileUri: s3Uri,
     },
     OutputBucketName: process.env.TRANSCRIPTIONS_S3_BUCKET_NAME,
-    OutputKey: `${jobId}.json`,
+    OutputKey: `${sanitizedKey}.json`,
     ContentRedaction: {
       RedactionType: "PII",
       PiiEntityTypes: [
