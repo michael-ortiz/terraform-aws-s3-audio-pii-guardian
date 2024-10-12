@@ -70,6 +70,9 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
 exports.handler = handler;
 function sendSlackNotification(objectKey, bucketName) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!process.env.SLACK_NOTIFICATIONS_WEBHOOK || process.env.SLACK_NOTIFICATIONS_WEBHOOK === "") {
+            return;
+        }
         const sanitizedKey = objectKey.replace("redacted-", '').replace(".json", '');
         yield fetch(process.env.SLACK_NOTIFICATIONS_WEBHOOK, {
             method: 'POST',

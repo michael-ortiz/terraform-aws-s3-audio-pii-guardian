@@ -72,6 +72,10 @@ export const handler = async (event: any, context: any) => {
 
 async function sendSlackNotification(objectKey: string, bucketName: string): Promise<void> {
 
+  if (!process.env.SLACK_NOTIFICATIONS_WEBHOOK || process.env.SLACK_NOTIFICATIONS_WEBHOOK === "") {
+    return;
+  }
+
   const sanitizedKey = objectKey.replace("redacted-", '').replace(".json", '');
 
   await fetch(process.env.SLACK_NOTIFICATIONS_WEBHOOK!, {
