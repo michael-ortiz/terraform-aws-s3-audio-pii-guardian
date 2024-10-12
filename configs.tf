@@ -1,3 +1,4 @@
+// Define the configuration for the infrastructure
 
 locals {
   analyse_audio_recording_on_s3_put = true
