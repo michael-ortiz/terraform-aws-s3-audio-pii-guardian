@@ -174,6 +174,6 @@ output "transcribe_audio_recordings_lambda_url" {
   value = aws_lambda_function_url.transcribe_audio_recordings_lambda.function_url
 }
 
-output "analyse_audio_recordings_lambda_url" {
+output "analyze_audio_recordings_lambda_url" {
   value = aws_lambda_function_url.analyse_audio_recordings_lambda.function_url
 }
