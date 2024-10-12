@@ -81,7 +81,10 @@ resource "aws_iam_policy" "transcribe_call_recording_lambda" {
         ],
         Effect = "Allow",
         Resource = [
-          "${aws_s3_bucket.call_recordings.arn}/*"
+          aws_s3_bucket.call_recordings.arn,
+          "${aws_s3_bucket.call_recordings.arn}/*",
+          aws_s3_bucket.call_recordings_transcriptions.arn,
+          "${aws_s3_bucket.call_recordings_transcriptions.arn}/*"
         ]
       },
       {

@@ -21,13 +21,17 @@ export const handler = async (event: any, context: any) => {
 
     const sanitizedKey = s3_key.replace("redacted-", '');
 
+    console.log("Sending notification to Slack", process.env.SLACK_NOTIFICATIONS_WEBHOOK!);
+
     await fetch(process.env.SLACK_NOTIFICATIONS_WEBHOOK!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ text: `PII detected in bucket ${s3_bucket}, key ${sanitizedKey}` })
-    });
+    }).catch((err) => {
+      console.error("Error sending notification to Slack", err);
+    } );
   }
 
   return null;
