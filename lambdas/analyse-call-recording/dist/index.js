@@ -23,14 +23,15 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
     const bodyContents = yield streamToString(data.Body);
     if (bodyContents.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG)) {
         console.log("PII detected in", s3_key);
-        const sanitizedKey = s3_key.replace("redacted-", '');
+        const sanitizedKey1 = s3_key.replace("redacted-", '');
+        const sanitizedKey2 = s3_key.replace(".json", '');
         console.log("Sending notification to Slack", process.env.SLACK_NOTIFICATIONS_WEBHOOK);
         yield fetch(process.env.SLACK_NOTIFICATIONS_WEBHOOK, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: `PII detected in Call Recording: ${sanitizedKey}. Bucket: ${s3_bucket}` })
+            body: JSON.stringify({ text: `PII detected in Call Recording: **${sanitizedKey2}**. \n\nBucket: **${s3_bucket}**` })
         }).catch((err) => {
             console.error("Error sending notification to Slack", err);
         });
