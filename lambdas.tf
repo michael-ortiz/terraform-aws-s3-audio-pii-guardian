@@ -1,46 +1,30 @@
 locals {
-  transcribe_audio_recordings_lambda_path = "${path.module}/lambdas/transcribe-audio-recording"
-  analyse_audio_recordings_lambda_path    = "${path.module}/lambdas/analyse-audio-recording"
-  redact_audio_processor_lambda_path      = "${path.module}/lambdas/redact-audio-processor"
-
+  s3_pii_audio_handler_lambda_path   = "${path.module}/lambdas/s3-pii-audio-handler"
+  redact_audio_processor_lambda_path = "${path.module}/lambdas/redact-audio-processor"
 }
 
-resource "aws_lambda_function" "transcribe_audio_recordings_lambda" {
-  filename         = "${local.transcribe_audio_recordings_lambda_path}/lambda.zip"
-  function_name    = "transcribe-audio-recordings-function"
-  role             = aws_iam_role.transcribe_audio_recordings_lambda.arn
+resource "aws_lambda_function" "s3_pii_audio_handler_lambda" {
+  filename         = "${local.s3_pii_audio_handler_lambda_path}/lambda.zip"
+  function_name    = "s3-pii-audio-handler-function"
+  role             = aws_iam_role.s3_pii_audio_handler_lambda.arn
   handler          = "dist/index.handler"
-  source_code_hash = filesha256("${local.transcribe_audio_recordings_lambda_path}/lambda.zip")
+  source_code_hash = filesha256("${local.s3_pii_audio_handler_lambda_path}/lambda.zip")
 
   runtime = "nodejs20.x"
 
   environment {
     variables = {
-      RECORDINGS_S3_BUCKET_NAME     = aws_s3_bucket.audio_recordings.id
-      TRANSCRIPTIONS_S3_BUCKET_NAME = aws_s3_bucket.audio_recordings_transcriptions.id
-      PII_ENTITIES                  = join(",", local.pii_entities)
-      MEDIA_FORMAT                  = local.media_format
-      DEFAULT_LANGUAGE_CODE         = local.default_language_code
-    }
-  }
-}
+      // Transcribe audio recordings lambda
+      AUDIO_BUCKET          = aws_s3_bucket.audio_recordings.id
+      TRANSCRIPTIONS_BUCKET = aws_s3_bucket.audio_recordings_transcriptions.id
+      PII_ENTITIES          = join(",", local.pii_entities)
+      MEDIA_FORMAT          = local.media_format
+      DEFAULT_LANGUAGE_CODE = local.default_language_code
 
-resource "aws_lambda_function" "analyse_audio_recordings_lambda" {
-  filename         = "${local.analyse_audio_recordings_lambda_path}/lambda.zip"
-  function_name    = "analyse-audio-recordings-function"
-  role             = aws_iam_role.analyse_audio_recordings_lambda.arn
-  handler          = "dist/index.handler"
-  source_code_hash = filesha256("${local.analyse_audio_recordings_lambda_path}/lambda.zip")
-
-  runtime = "nodejs20.x"
-
-  environment {
-    variables = {
-      RECORDINGS_TRANSCRIPTIONS_S3_BUCKET_NAME = aws_s3_bucket.audio_recordings_transcriptions.id
-      AUDIO_RECORDINGS_S3_BUCKET_NAME          = aws_s3_bucket.audio_recordings.id
-      SLACK_NOTIFICATIONS_WEBHOOK              = local.slack_notification_webhook
-      AWS_TRANSCRIBE_REDACTED_PII_TAG          = "[PII]" // This is the tag that is used if any PII is found in the transcription
-      REDACT_AUDIO_PROCESSOR_LAMBDA_NAME       = aws_lambda_function.pii_audio_redaction_lambda.function_name
+      // Analyze audio recordings lambda
+      SLACK_NOTIFICATIONS_WEBHOOK        = local.slack_notification_webhook
+      AWS_TRANSCRIBE_REDACTED_PII_TAG    = "[PII]" // This is the tag that is used if any PII is found in the transcription
+      REDACT_AUDIO_PROCESSOR_LAMBDA_NAME = aws_lambda_function.pii_audio_redaction_lambda.function_name
     }
   }
 }
@@ -61,18 +45,13 @@ resource "aws_lambda_function" "pii_audio_redaction_lambda" {
 
   environment {
     variables = {
-      RECORDINGS_S3_BUCKET_NAME = aws_s3_bucket.audio_recordings.id
+      AUDIO_BUCKET = aws_s3_bucket.audio_recordings.id
     }
   }
 }
 
-resource "aws_iam_role" "transcribe_audio_recordings_lambda" {
-  name               = "transcribe_audio_recordings_lambda_role"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-}
-
-resource "aws_iam_role" "analyse_audio_recordings_lambda" {
-  name               = "analyse_audio_recordings_lambda_role"
+resource "aws_iam_role" "s3_pii_audio_handler_lambda" {
+  name               = "s3_pii_audio_handler_lambda_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
@@ -94,8 +73,8 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_policy" "transcribe_audio_recordings_lambda" {
-  name        = "transcribe_audio_recordings_lambda_policy"
+resource "aws_iam_policy" "s3_pii_audio_handler_lambda" {
+  name        = "s3_pii_audio_handler_lambda_policy"
   description = "Basic execution policy for Lambda"
   policy = jsonencode({
     Version = "2012-10-17",
@@ -135,45 +114,6 @@ resource "aws_iam_policy" "transcribe_audio_recordings_lambda" {
   })
 }
 
-resource "aws_iam_policy" "analyse_audio_recordings_lambda" {
-  name        = "s3_recordings_analyse_trigger_policy"
-  description = "Basic execution policy for Lambda"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ],
-        Effect   = "Allow",
-        Resource = "arn:aws:logs:*:*:*"
-      },
-      {
-        Action = [
-          "s3:GetObject",
-          "s3:ListBucket"
-        ],
-        Effect = "Allow",
-        Resource = [
-          aws_s3_bucket.audio_recordings_transcriptions.arn,
-          "${aws_s3_bucket.audio_recordings_transcriptions.arn}/*"
-        ]
-      },
-      {
-        Action = [
-          "lambda:InvokeFunction"
-        ],
-        Effect = "Allow",
-        Resource = [
-          aws_lambda_function.pii_audio_redaction_lambda.arn
-        ]
-      }
-    ]
-  })
-}
-
 resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
   name        = "redact_pii_audio_recording_lambda_policy"
   description = "Basic execution policy for Lambda"
@@ -204,14 +144,9 @@ resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "transcribe_audio_recordings_lambda" {
-  role       = aws_iam_role.transcribe_audio_recordings_lambda.name
-  policy_arn = aws_iam_policy.transcribe_audio_recordings_lambda.arn
-}
-
-resource "aws_iam_role_policy_attachment" "analyse_audio_recordings_lambda" {
-  role       = aws_iam_role.analyse_audio_recordings_lambda.name
-  policy_arn = aws_iam_policy.analyse_audio_recordings_lambda.arn
+resource "aws_iam_role_policy_attachment" "s3_pii_audio_handler_lambda" {
+  role       = aws_iam_role.s3_pii_audio_handler_lambda.name
+  policy_arn = aws_iam_policy.s3_pii_audio_handler_lambda.arn
 }
 
 resource "aws_iam_role_policy_attachment" "redact_pii_audio_recording_lambda" {
@@ -222,37 +157,28 @@ resource "aws_iam_role_policy_attachment" "redact_pii_audio_recording_lambda" {
 ## Lambda Permissions
 
 resource "aws_lambda_permission" "s3_recordings_trigger_permission" {
-  statement_id  = "AllowExecutionFromS3Bucket"
+  statement_id  = "AllowExecutionFromAudioS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.transcribe_audio_recordings_lambda.arn
+  function_name = aws_lambda_function.s3_pii_audio_handler_lambda.arn
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.audio_recordings.arn
 }
 
 resource "aws_lambda_permission" "s3_recordings_transcriptions_trigger_permission" {
-  statement_id  = "AllowExecutionFromS3Bucket"
+  statement_id  = "AllowExecutionFromTranscriptionsS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.analyse_audio_recordings_lambda.arn
+  function_name = aws_lambda_function.s3_pii_audio_handler_lambda.arn
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.audio_recordings_transcriptions.arn
 }
 
-resource "aws_lambda_function_url" "transcribe_audio_recordings_lambda" {
-  function_name      = aws_lambda_function.transcribe_audio_recordings_lambda.function_name
+resource "aws_lambda_function_url" "s3_pii_audio_handler_lambda" {
+  function_name      = aws_lambda_function.s3_pii_audio_handler_lambda.function_name
   authorization_type = "NONE" // Change this to "AWS_IAM" if you want to secure the endpoint
 }
 
-resource "aws_lambda_function_url" "analyse_audio_recordings_lambda" {
-  function_name      = aws_lambda_function.analyse_audio_recordings_lambda.function_name
-  authorization_type = "NONE" // Change this to "AWS_IAM" if you want to secure the endpoint
-}
-
-output "transcribe_audio_recordings_lambda_url" {
-  value = aws_lambda_function_url.transcribe_audio_recordings_lambda.function_url
-}
-
-output "analyze_audio_recordings_lambda_url" {
-  value = aws_lambda_function_url.analyse_audio_recordings_lambda.function_url
+output "s3_pii_audio_handler_lambda_function_url" {
+  value = aws_lambda_function_url.s3_pii_audio_handler_lambda.function_url
 }
 
 resource "aws_lambda_layer_version" "ffmpeg_layer" {

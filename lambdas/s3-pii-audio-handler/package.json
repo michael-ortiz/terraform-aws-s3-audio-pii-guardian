@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "build": "tsc && rm -rf lambda.zip && zip -r lambda.zip .",
+    "start": "node dist/index.js",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.670.0",
+    "@aws-sdk/client-s3": "^3.670.0",
+    "@aws-sdk/client-transcribe": "^3.670.0",
+    "express": "^4.21.1",
+    "serverless-http": "^3.2.0",
+    "typescript": "^5.6.3",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
+    "@types/uuid": "^10.0.0"
+  }
+}

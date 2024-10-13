@@ -6,7 +6,7 @@ s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
     
-    bucket_name =  os.environ.get('RECORDINGS_S3_BUCKET_NAME')
+    bucket_name =  os.environ.get('AUDIO_BUCKET')
     s3_object_key = event.get('s3ObjectKey')
     mute_time_stamps = event.get('muteTimeStamps')
 
