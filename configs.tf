@@ -3,10 +3,13 @@
 locals {
 
   // Trigger the transcription of the audio recordings when they are put on S3 automatically
-  analyse_audio_recording_on_s3_put = true
+  auto_s3_put_trigger = true
 
-  // Define the suffix for the audio files
-  audio_file_suffix_suffix          = ".wav"
+  // Define a default language options for the audio transcription
+  default_language_code = "en-US"
+ 
+  // Define the format and file extension of the audio files in S3
+  media_format = "wav"
 
   // Define the suffix for the transcriptions file
   transcriptions_file_suffix        = ".json"

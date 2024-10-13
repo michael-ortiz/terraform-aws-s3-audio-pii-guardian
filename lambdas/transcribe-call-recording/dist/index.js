@@ -14,10 +14,10 @@ const client_transcribe_1 = require("@aws-sdk/client-transcribe");
 const uuid_1 = require("uuid");
 const transcribeClient = new client_transcribe_1.TranscribeClient({ region: 'us-east-1' });
 const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(event);
     let s3ObjectKeys = [];
     const startedJobs = [];
     const failedJobs = [];
+    let languageCode = process.env.DEFAULT_LANGUAGE_CODE;
     if (event.Records) {
         // Get the s3 object keys from the event
         s3ObjectKeys = event.Records.map((record) => {
@@ -55,6 +55,10 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
         s3ObjectKeys = body.s3ObjectKeys.map((objectKey) => {
             return objectKey;
         });
+        // Get the language code from the body if it exists
+        if (body.languageCode) {
+            languageCode = body.languageCode;
+        }
     }
     else {
         return {
@@ -72,8 +76,8 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
             // Set the parameters
             const params = {
                 TranscriptionJobName: jobId,
-                LanguageCode: "en-US", // For example, 'en-US'
-                MediaFormat: "wav",
+                LanguageCode: languageCode,
+                MediaFormat: process.env.MEDIA_FORMAT,
                 Media: {
                     MediaFileUri: s3Uri,
                 },
@@ -85,6 +89,7 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
                     RedactionOutput: "redacted"
                 }
             };
+            console.log("PARAMS", params);
             // Start the transcription job
             yield transcribeClient.send(new client_transcribe_1.StartTranscriptionJobCommand(params));
             // Add the job to the started jobs array

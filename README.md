@@ -75,6 +75,7 @@ https://{ID}.lambda-url.us-east-1.on.aws
 **Body:**
 ```
 {
+  languageCode: "en-US", // Optionally, override default language
   "s3ObjectKeys": [
     "{AUDIO_FILE_NAME}.wav"
   ]

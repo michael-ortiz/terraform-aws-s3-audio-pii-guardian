@@ -1,5 +1,5 @@
 
-import { PiiEntityType, StartTranscriptionJobCommand, StartTranscriptionJobCommandInput, TranscribeClient } from "@aws-sdk/client-transcribe";
+import { LanguageCode, MediaFormat, PiiEntityType, StartTranscriptionJobCommand, StartTranscriptionJobCommandInput, TranscribeClient } from "@aws-sdk/client-transcribe";
 import { v4 as uuidv4 } from 'uuid';
 
 const transcribeClient = new TranscribeClient({ region: 'us-east-1' });
@@ -12,11 +12,11 @@ interface Jobs {
 
 export const handler = async (event: any, context: any) => {
 
-  console.log(event);
-
   let s3ObjectKeys: string[] = [];
   const startedJobs: Jobs[] = [];
   const failedJobs: Jobs[] = [];
+  
+  let languageCode = process.env.DEFAULT_LANGUAGE_CODE;
 
   if (event.Records) {
 
@@ -62,6 +62,11 @@ export const handler = async (event: any, context: any) => {
       return objectKey
     });
 
+    // Get the language code from the body if it exists
+    if (body.languageCode) {
+      languageCode = body.languageCode;
+    }
+
   } else {
     return {
       statusCode: 400,
@@ -82,8 +87,8 @@ export const handler = async (event: any, context: any) => {
       // Set the parameters
       const params: StartTranscriptionJobCommandInput = {
         TranscriptionJobName: jobId,
-        LanguageCode: "en-US", // For example, 'en-US'
-        MediaFormat: "wav",
+        LanguageCode: languageCode as LanguageCode,
+        MediaFormat: process.env.MEDIA_FORMAT as MediaFormat,
         Media: {
           MediaFileUri: s3Uri,
         },
@@ -95,6 +100,8 @@ export const handler = async (event: any, context: any) => {
           RedactionOutput: "redacted"
         }
       };
+
+      console.log("PARAMS", params);
 
       // Start the transcription job
       await transcribeClient.send(
