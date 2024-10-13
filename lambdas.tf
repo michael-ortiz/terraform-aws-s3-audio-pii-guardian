@@ -29,7 +29,8 @@ resource "aws_lambda_function" "s3_pii_audio_handler_lambda" {
       AWS_TRANSCRIBE_REDACTED_PII_TAG    = "[PII]" // This is the tag that is used if any PII is found in the transcription
       REDACT_AUDIO_PROCESSOR_LAMBDA_NAME = aws_lambda_function.pii_audio_redaction_lambda.function_name
 
-      CURRENT_LAMBDA_NAME = local.redact_audio_processor_lambda_name
+      CURRENT_LAMBDA_NAME   = local.redact_audio_processor_lambda_name
+      REDACT_ORIGINAL_AUDIO = local.redact_original_audio
     }
   }
 }

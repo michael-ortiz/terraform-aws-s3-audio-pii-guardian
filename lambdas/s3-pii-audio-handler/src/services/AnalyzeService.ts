@@ -45,16 +45,20 @@ export class AnalyzeService {
 
         await this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
 
-        // Call Lambda function to redact PII in the audio recording
-        await this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
 
-        return {
-          message: "PII detected in call recording. Call will be redacted.",
-          containsPII: true,
-          audioUri: `s3://${audioBucket}/${originalObjectKey}`,
-          transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
-          transcript: transcript
+        if (process.env.REDACT_ORIGINAL_AUDIO === "true") {
+          // Call Lambda function to redact PII in the audio recording
+          await this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
         }
+      }
+
+      return {
+        message: "PII detected in call recording.",
+        containsPII: true,
+        redactOriginalAudio: process.env.REDACT_ORIGINAL_AUDIO === "true",
+        audioUri: `s3://${audioBucket}/${originalObjectKey}`,
+        transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
+        transcript: transcript
       }
 
       return {

@@ -5,6 +5,8 @@ locals {
   // Trigger the transcription of the audio recordings when they are put on S3 automatically
   auto_s3_put_trigger = true
 
+  redact_original_audio = true
+
   // Define a default language options for the audio transcription
   default_language_code = "en-US"
  

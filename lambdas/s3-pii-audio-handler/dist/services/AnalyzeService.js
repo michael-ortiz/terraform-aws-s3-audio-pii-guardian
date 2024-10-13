@@ -41,16 +41,19 @@ class AnalyzeService {
                 // Check if the body contains the redacted PII tag
                 if (transcript.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG)) {
                     yield this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
-                    // Call Lambda function to redact PII in the audio recording
-                    yield this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
-                    return {
-                        message: "PII detected in call recording. Call will be redacted.",
-                        containsPII: true,
-                        audioUri: `s3://${audioBucket}/${originalObjectKey}`,
-                        transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
-                        transcript: transcript
-                    };
+                    if (process.env.REDACT_ORIGINAL_AUDIO === "true") {
+                        // Call Lambda function to redact PII in the audio recording
+                        yield this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
+                    }
                 }
+                return {
+                    message: "PII detected in call recording.",
+                    containsPII: true,
+                    redactOriginalAudio: process.env.REDACT_ORIGINAL_AUDIO === "true",
+                    audioUri: `s3://${audioBucket}/${originalObjectKey}`,
+                    transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
+                    transcript: transcript
+                };
                 return {
                     message: "No PII detected in call recording",
                     containsPII: false,
