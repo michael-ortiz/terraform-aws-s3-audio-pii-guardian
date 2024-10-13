@@ -15,6 +15,7 @@ locals {
   slack_notification_webhook        = ""
 
   // Define the PII entities that we want to detect
+  // Properties defined here: https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction-batch.html
   pii_entities = [
     //"ALL",
     "ADDRESS",
