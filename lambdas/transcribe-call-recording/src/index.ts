@@ -1,5 +1,5 @@
 
-import { StartTranscriptionJobCommand, StartTranscriptionJobCommandInput, TranscribeClient } from "@aws-sdk/client-transcribe";
+import { PiiEntityType, StartTranscriptionJobCommand, StartTranscriptionJobCommandInput, TranscribeClient } from "@aws-sdk/client-transcribe";
 import { v4 as uuidv4 } from 'uuid';
 
 const transcribeClient = new TranscribeClient({ region: 'us-east-1' });
@@ -91,15 +91,7 @@ export const handler = async (event: any, context: any) => {
         OutputKey: `${s3ObjectKey}.json`,
         ContentRedaction: {
           RedactionType: "PII",
-          PiiEntityTypes: [
-            "SSN",
-            "CREDIT_DEBIT_NUMBER",
-            "CREDIT_DEBIT_EXPIRY",
-            "CREDIT_DEBIT_CVV",
-            "PIN",
-            "BANK_ROUTING",
-            "BANK_ACCOUNT_NUMBER"
-          ],
+          PiiEntityTypes: process.env.PII_ENTITIES!.split(",") as PiiEntityType[],
           RedactionOutput: "redacted"
         }
       };

@@ -81,15 +81,7 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
                 OutputKey: `${s3ObjectKey}.json`,
                 ContentRedaction: {
                     RedactionType: "PII",
-                    PiiEntityTypes: [
-                        "SSN",
-                        "CREDIT_DEBIT_NUMBER",
-                        "CREDIT_DEBIT_EXPIRY",
-                        "CREDIT_DEBIT_CVV",
-                        "PIN",
-                        "BANK_ROUTING",
-                        "BANK_ACCOUNT_NUMBER"
-                    ],
+                    PiiEntityTypes: process.env.PII_ENTITIES.split(","),
                     RedactionOutput: "redacted"
                 }
             };

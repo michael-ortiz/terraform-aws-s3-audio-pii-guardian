@@ -16,6 +16,7 @@ resource "aws_lambda_function" "transcribe_audio_recordings_lambda" {
     variables = {
       RECORDINGS_S3_BUCKET_NAME     = aws_s3_bucket.audio_recordings.id
       TRANSCRIPTIONS_S3_BUCKET_NAME = aws_s3_bucket.audio_recordings_transcriptions.id
+      PII_ENTITIES                  = join(",", local.pii_entities)
     }
   }
 }
