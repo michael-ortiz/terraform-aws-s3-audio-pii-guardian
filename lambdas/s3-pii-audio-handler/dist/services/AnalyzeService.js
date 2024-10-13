@@ -22,14 +22,14 @@ class AnalyzeService {
         this.lambdaClient = new client_lambda_1.LambdaClient({ region: "us-east-1" });
         this.notifications = new NotificationService_1.NotificationService();
     }
-    analyzeAudioRecording(seObjectKey, eventType) {
+    analyzeAudioRecording(s3ObjectKey, eventType) {
         return __awaiter(this, void 0, void 0, function* () {
             const transcriptionsBucket = process.env.TRANSCRIPTIONS_BUCKET;
             const audioBucket = process.env.AUDIO_BUCKET;
-            const originalObjectKey = (0, Utils_1.getOriginalObjectKey)(seObjectKey);
+            const originalObjectKey = (0, Utils_1.getOriginalObjectKey)(s3ObjectKey);
             const params = {
                 Bucket: transcriptionsBucket,
-                Key: eventType === TranscribeService_1.EventType.S3 ? seObjectKey : `redacted-${seObjectKey}.json`
+                Key: eventType === TranscribeService_1.EventType.S3 ? s3ObjectKey : `redacted-${s3ObjectKey}.json`
             };
             try {
                 const data = yield this.s3Client.send(new client_s3_1.GetObjectCommand(params));
@@ -40,22 +40,22 @@ class AnalyzeService {
                 const transcript = parsedBody.results.transcripts[0].transcript;
                 // Check if the body contains the redacted PII tag
                 if (transcript.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG)) {
-                    yield this.notifications.sendSlackNotification(seObjectKey, transcriptionsBucket);
+                    yield this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
                     // Call Lambda function to redact PII in the audio recording
                     yield this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
                     return {
-                        message: "PII detected in call recording",
+                        message: "PII detected in call recording. Call will be redacted.",
                         containsPII: true,
                         audioUri: `s3://${audioBucket}/${originalObjectKey}`,
-                        redactedAudioUri: `s3://${audioBucket}/redacted/${originalObjectKey}`,
-                        transcriptUri: `s3://${transcriptionsBucket}/${seObjectKey}`
+                        transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
+                        transcript: transcript
                     };
                 }
                 return {
                     message: "No PII detected in call recording",
                     containsPII: false,
                     audioUri: `s3://${audioBucket}/${originalObjectKey}`,
-                    transcriptUri: `s3://${transcriptionsBucket}/${seObjectKey}`
+                    transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`
                 };
             }
             catch (error) {

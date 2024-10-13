@@ -33,15 +33,38 @@ const handler = (0, serverless_http_1.default)(app);
 // Handler for S3 events
 const s3EventHandler = (records) => __awaiter(void 0, void 0, void 0, function* () {
     for (const record of records) {
+        if (record.eventSource !== "aws:s3") {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    message: "Event source is not S3"
+                })
+            };
+        }
         const objectKey = record.s3.object.key;
-        if (record.bucket.name == process.env.AUDIO_BUCKET) {
-            const response = yield transcribeService.transcribeAudioRecording(objectKey);
+        if (record.userIdentity.principalId.includes(process.env.CURRENT_LAMBDA_NAME)) {
+            // Skip if the event source is the current lambda function as this event is only 
+            // triggered when re overriding the original audio redacted audio file.
+            // We don't want to trigger the transcription job again when the redacted audio file is uploaded.
+            const response = {
+                event: "SKIPPED_S3_EVENT",
+                objectKey,
+                message: "Event source is the current lambda function"
+            };
+            console.log(response);
+            return {
+                statusCode: 200,
+                body: JSON.stringify(response)
+            };
+        }
+        if (record.s3.bucket.name == process.env.AUDIO_BUCKET) {
+            const response = yield transcribeService.transcribeAudioRecording([objectKey]);
             return {
                 statusCode: 200,
                 body: JSON.stringify(response),
             };
         }
-        if (record.bucket.name == process.env.TRANSCRIPTIONS_BUCKET) {
+        if (record.s3.bucket.name == process.env.TRANSCRIPTIONS_BUCKET) {
             const objectKey = record.s3.object.key;
             const response = yield analyzeService.analyzeAudioRecording(objectKey, TranscribeService_1.EventType.S3);
             return {
@@ -58,6 +81,7 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 startServer();
 module.exports.handler = (event, context, _callback) => {
+    console.log(JSON.stringify(event));
     // Call the handler for S3 events
     if (event.Records && event.Records.length > 0) {
         return s3EventHandler(event.Records);

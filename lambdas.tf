@@ -1,11 +1,14 @@
 locals {
   s3_pii_audio_handler_lambda_path   = "${path.module}/lambdas/s3-pii-audio-handler"
   redact_audio_processor_lambda_path = "${path.module}/lambdas/redact-audio-processor"
+
+  redact_audio_processor_lambda_name = "pii-audio-redaction-function"
+  s3_pii_audio_handler_lambda_name   = "s3-pii-audio-handler-function"
 }
 
 resource "aws_lambda_function" "s3_pii_audio_handler_lambda" {
   filename         = "${local.s3_pii_audio_handler_lambda_path}/lambda.zip"
-  function_name    = "s3-pii-audio-handler-function"
+  function_name    = local.s3_pii_audio_handler_lambda_name
   role             = aws_iam_role.s3_pii_audio_handler_lambda.arn
   handler          = "dist/index.handler"
   source_code_hash = filesha256("${local.s3_pii_audio_handler_lambda_path}/lambda.zip")
@@ -25,13 +28,15 @@ resource "aws_lambda_function" "s3_pii_audio_handler_lambda" {
       SLACK_NOTIFICATIONS_WEBHOOK        = local.slack_notification_webhook
       AWS_TRANSCRIBE_REDACTED_PII_TAG    = "[PII]" // This is the tag that is used if any PII is found in the transcription
       REDACT_AUDIO_PROCESSOR_LAMBDA_NAME = aws_lambda_function.pii_audio_redaction_lambda.function_name
+
+      CURRENT_LAMBDA_NAME = local.redact_audio_processor_lambda_name
     }
   }
 }
 
 resource "aws_lambda_function" "pii_audio_redaction_lambda" {
   filename         = "${local.redact_audio_processor_lambda_path}/lambda.zip"
-  function_name    = "pii-audio-redaction-function"
+  function_name    = local.redact_audio_processor_lambda_name
   role             = aws_iam_role.redact_pii_audio_recording_lambda.arn
   handler          = "app.lambda_handler"
   source_code_hash = filesha256("${local.redact_audio_processor_lambda_path}/lambda.zip")
@@ -108,6 +113,15 @@ resource "aws_iam_policy" "s3_pii_audio_handler_lambda" {
         Effect = "Allow",
         Resource = [
           "*"
+        ]
+      },
+      {
+        Action = [
+          "lambda:InvokeFunction"
+        ],
+        Effect = "Allow",
+        Resource = [
+          aws_lambda_function.pii_audio_redaction_lambda.arn
         ]
       }
     ]

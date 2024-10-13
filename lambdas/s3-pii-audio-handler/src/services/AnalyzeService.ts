@@ -18,15 +18,15 @@ export class AnalyzeService {
     this.notifications = new NotificationService();
   }
 
-  async analyzeAudioRecording(seObjectKey: string, eventType: EventType) {
+  async analyzeAudioRecording(s3ObjectKey: string, eventType: EventType) {
 
     const transcriptionsBucket = process.env.TRANSCRIPTIONS_BUCKET!;
     const audioBucket = process.env.AUDIO_BUCKET!;
-    const originalObjectKey = getOriginalObjectKey(seObjectKey);
+    const originalObjectKey = getOriginalObjectKey(s3ObjectKey);
 
     const params = {
       Bucket: transcriptionsBucket,
-      Key: eventType === EventType.S3 ? seObjectKey : `redacted-${seObjectKey}.json`
+      Key: eventType === EventType.S3 ? s3ObjectKey : `redacted-${s3ObjectKey}.json`
     };
 
     try {
@@ -43,17 +43,17 @@ export class AnalyzeService {
       // Check if the body contains the redacted PII tag
       if (transcript.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG!)) {
 
-        await this.notifications.sendSlackNotification(seObjectKey, transcriptionsBucket);
+        await this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
 
         // Call Lambda function to redact PII in the audio recording
         await this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
 
         return {
-          message: "PII detected in call recording",
+          message: "PII detected in call recording. Call will be redacted.",
           containsPII: true,
           audioUri: `s3://${audioBucket}/${originalObjectKey}`,
-          redactedAudioUri: `s3://${audioBucket}/redacted/${originalObjectKey}`,
-          transcriptUri: `s3://${transcriptionsBucket}/${seObjectKey}`
+          transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
+          transcript: transcript
         }
       }
 
@@ -61,7 +61,7 @@ export class AnalyzeService {
         message: "No PII detected in call recording",
         containsPII: false,
         audioUri: `s3://${audioBucket}/${originalObjectKey}`,
-        transcriptUri: `s3://${transcriptionsBucket}/${seObjectKey}`
+        transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`
       }
 
     } catch (error) {
