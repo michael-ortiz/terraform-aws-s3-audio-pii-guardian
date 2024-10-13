@@ -69,7 +69,7 @@ Get API urls from Terraform Output.
 
 Example:
 ```
-https://{ID}.lambda-url.us-east-1.on.aws
+https://{ID}.lambda-url.us-east-1.on.aws/transcribe
 ```
 
 **Body:**
@@ -104,5 +104,5 @@ Method: `GET`
 
 Example:
 ```
-https://{ID}.lambda-url.us-east-1.on.aws?s3ObjectKey={AUDIO_FILE_NAME}.wav
+https://{ID}.lambda-url.us-east-1.on.aws/analyze/{AUDIO_FILE_NAME}
 ```
