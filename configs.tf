@@ -9,6 +9,7 @@ locals {
   default_language_code = "en-US"
  
   // Define the format and file extension of the audio files in S3
+  // Valid values: mp3, mp4, wav, flac, amr, ogg, and webm.
   media_format = "wav"
 
   // Define the suffix for the transcriptions file

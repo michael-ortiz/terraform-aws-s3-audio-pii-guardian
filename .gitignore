@@ -3,3 +3,4 @@ node_modules
 .DS_Store
 terraform.tfstate
 terraform.tfstate.backup
+docs
