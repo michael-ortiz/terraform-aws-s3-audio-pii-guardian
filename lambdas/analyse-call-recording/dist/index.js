@@ -41,17 +41,23 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
         if (bodyContents.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG)) {
             yield sendSlackNotification(s3_key, s3_bucket);
             return {
-                message: "PII detected in call recording",
-                containsPII: true,
-                bucket: s3_bucket,
-                key: s3_key,
+                statusCode: 200,
+                body: JSON.stringify({
+                    message: "PII detected in call recording",
+                    containsPII: true,
+                    bucket: s3_bucket,
+                    key: s3_key,
+                })
             };
         }
         return {
-            message: "No PII detected in call recording",
-            containsPII: false,
-            bucket: s3_bucket,
-            key: s3_key,
+            statusCode: 200,
+            body: JSON.stringify({
+                message: "No PII detected in call recording",
+                containsPII: false,
+                bucket: s3_bucket,
+                key: s3_key,
+            })
         };
     }
     catch (err) {
@@ -60,10 +66,13 @@ const handler = (event, context) => __awaiter(void 0, void 0, void 0, function* 
             error: err
         });
         return {
-            message: "Error analyzing call recording",
-            bucket: s3_bucket,
-            key: s3_key,
-            error: err
+            statusCode: 400,
+            body: JSON.stringify({
+                message: "Error analyzing call recording",
+                bucket: s3_bucket,
+                key: s3_key,
+                error: err
+            })
         };
     }
 });

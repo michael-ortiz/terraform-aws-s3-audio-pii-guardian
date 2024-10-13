@@ -12,24 +12,63 @@ interface Jobs {
 
 export const handler = async (event: any, context: any) => {
 
-  let s3_key;
+  console.log(event);
+
   let s3ObjectKeys: string[] = [];
   const startedJobs: Jobs[] = [];
   const failedJobs: Jobs[] = [];
 
   if (event.Records) {
 
-    s3_key = event.Records[0].s3.object.key
-
+    // Get the s3 object keys from the event
     s3ObjectKeys = event.Records.map((record: any) => {
       return record.s3.object.key
-    })
+    });
 
-  } else if (event.queryStringParameters) {
-    s3_key = event.queryStringParameters.s3ObjectKey
-    s3ObjectKeys.push(s3_key);
+  } else if (event.body) {
+
+    const body = JSON.parse(event.body);
+
+    // Validate the body
+    if (!body.s3ObjectKeys) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "No s3 object keys found in body"
+        })
+      }
+    }
+
+    if (!Array.isArray(body.s3ObjectKeys)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Expected s3 object keys to be an array"
+        })
+      }
+    }
+
+    if (body.s3ObjectKeys.length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Array of s3 object keys is empty"
+        })
+      }
+    }
+
+    // Get the s3 object keys from the body
+    s3ObjectKeys = body.s3ObjectKeys.map((objectKey: any) => {
+      return objectKey
+    });
+
   } else {
-    throw new Error("No s3 object key found in event")
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        message: "No s3 object keys found in event or body"
+      })
+    }
   }
 
   // Start a transcription job for each object key
