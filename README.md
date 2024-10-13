@@ -4,7 +4,7 @@ This project allows you to provision the necesary infrastructure to enable you t
 
 You have the option to automatically run PII detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API.
 
-We leverage on AWS Transcribe Services to handle the detection of PII information.
+We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) Services to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
 
 # Architecture
 
