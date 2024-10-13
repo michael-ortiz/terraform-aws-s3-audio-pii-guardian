@@ -1,6 +1,6 @@
 locals {
-  transcribe_audio_recordings_lambda_path = "${path.module}/lambdas/transcribe-call-recording/Archive.zip"
-  analyse_audio_recordings_lambda_path    = "${path.module}/lambdas/analyse-call-recording/Archive.zip"
+  transcribe_audio_recordings_lambda_path = "${path.module}/lambdas/transcribe-call-recording/lambda.zip"
+  analyse_audio_recordings_lambda_path    = "${path.module}/lambdas/analyse-call-recording/lambda.zip"
 }
 
 resource "aws_lambda_function" "transcribe_audio_recordings_lambda" {
