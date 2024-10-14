@@ -1,6 +1,6 @@
 # aws-s3-audio-pii-guardian 🔒
 
-This project allows you to provision the necesary infrastructure to enable you to detect PII information in audio voice recordings stored in S3.
+This is an open source project tht allows you to provision the necesary infrastructure to enable you to detect PII information in audio voice recordings stored in S3.
 
 You have the option to automatically run PII (Personal Identifiable Information) detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API for existing objects.
 
