@@ -14,16 +14,19 @@ locals {
 
   // Define a default language options for the audio transcription
   default_language_code = "en-US"
- 
+
   // Define the format and file extension of the audio files in S3
   // Valid values: mp3, mp4, wav, flac, amr, ogg, and webm.
   media_format = "wav"
 
   // Define the suffix for the transcriptions file
-  transcriptions_file_suffix        = ".json"
+  transcriptions_file_suffix = ".json"
+
+  // Optional: Set a webhook for notifications. If not set, no notifications will be sent
+  notification_webhook_url = ""
 
   // Optional: Set webhook for Slack notifications. If not set, no notifications will be sent
-  slack_notification_webhook        = ""
+  slack_notification_webhook_url = ""
 
   // Define the PII entities that we want to detect
   // Properties defined here: https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction-batch.html

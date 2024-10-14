@@ -27,12 +27,12 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
       DEFAULT_LANGUAGE_CODE = local.default_language_code
 
       // Analyze audio recordings variables
-      SLACK_NOTIFICATIONS_WEBHOOK     = local.slack_notification_webhook
-      AWS_TRANSCRIBE_REDACTED_PII_TAG = "[PII]" // This is the tag that is used if any PII is found in the transcription
-      redacter_function_name          = try(aws_lambda_function.pii_audio_redacter_function[0].function_name, null)
+      NOTIFICATIONS_WEBHOOK           = local.notification_webhook_url
+      SLACK_NOTIFICATIONS_WEBHOOK     = local.slack_notification_webhook_url
+      AWS_TRANSCRIBE_REDACTED_PII_TAG = "[PII]" // This is the tag that is used if any PII is found in the transcription. Do not change this value
 
-      CURRENT_LAMBDA_NAME   = local.redacter_function_name
-      REDACT_AUDIO = local.redact_audio
+      CURRENT_LAMBDA_NAME = local.redacter_function_name
+      REDACT_AUDIO        = local.redact_audio
     }
   }
 }
@@ -54,8 +54,8 @@ resource "aws_lambda_function" "pii_audio_redacter_function" {
 
   environment {
     variables = {
-      AUDIO_BUCKET = aws_s3_bucket.audio.id
-      REDACT_AUDIO = local.redact_audio
+      AUDIO_BUCKET             = aws_s3_bucket.audio.id
+      REDACT_AUDIO             = local.redact_audio
       OVERWRITE_ORIGINAL_AUDIO = local.overwrite_original_audio
     }
   }
