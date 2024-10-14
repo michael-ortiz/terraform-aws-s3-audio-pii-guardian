@@ -20,18 +20,20 @@ def lambda_handler(event, context):
 
     # Validate the input
     if not s3_object_key:
+        print("ERROR: s3ObjectKey is required")
         return {
             "statusCode": 400,
             "body": json.dumps({
-                "error": "object_key is required"
+                "error": "s3ObjectKey is required"
             })
         }
     
     if not mute_time_stamps:
+        print("ERROR: muteTimeStamps is required")
         return {
             "statusCode": 400,
             "body": json.dumps({
-                "error": "time_stamps is required"
+                "error": "muteTimeStamps is required"
             })
         }
     
