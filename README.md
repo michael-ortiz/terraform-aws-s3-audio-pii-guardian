@@ -2,7 +2,7 @@
 
 # Description 🏁
 
-This is an open source project tht allows you to provision the necesary infrastructure to enable you to detect PII information in audio voice recordings stored in S3.
+This is an open source project that allows you to provision the necessary infrastructure to enable you to detect PII information in audio voice recordings stored in S3.
 
 You have the option to automatically run PII (Personal Identifiable Information) detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API for existing objects.
 
@@ -12,7 +12,7 @@ If PII is detected, a process will redact and mute the PII information in the or
 
 # PII Supported Detection Types 🕵️
 
-Below are the types of information that AWS Transcribe can detct:
+Below are the types of information that AWS Transcribe can detect:
 
 * ADDRESS
 * BANK_ACCOUNT_NUMBER
@@ -34,7 +34,7 @@ You can optionally configure the data you want to detect and redact in `configs.
 
 * AWS S3 (storage)
 * AWS Lambda (backend)
-* AWS Transribe (transcriptions + PII detection)
+* AWS Transcribe (transcriptions + PII detection)
 
 ## Use Case 1: Automatic Detection on New Objects in S3
 
@@ -65,14 +65,14 @@ This is a Terraform project that you can use and test out on your own.
 
 Be sure to have [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) and [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed.
 
-To deploy the infrastrcuture, run:
+To deploy the infrastructure, run:
 
 ```sh
 terraform init
 terraform apply
 ```
 
-# Modying Lambdas 📝
+# Modifying Lambdas 📝
 
 You can optionally modify the lambdas to your needs. 
 
@@ -209,7 +209,7 @@ As of October 13, 2024 for `us-east-1`.
 
 See [Amazon Transcribe Pricing](https://aws.amazon.com/transcribe/pricing/) for most up to date pricing.
 
-Since we will transcribe calls and also redact PII, both pricings will apply.
+Since we will transcribe calls to text and also redact / identify PII, both Standard an PII Redaction pricings will apply.
 
 ### Standard Pricing
 <img width="870" alt="Screenshot 2024-10-14 at 11 37 24 AM" src="https://github.com/user-attachments/assets/fa0fda3a-3a5c-4a85-998f-6174482e028f">
@@ -224,5 +224,3 @@ See [AWS S3 Pricing](https://aws.amazon.com/s3/pricing/)
 ## Lambda Pricing
 
 See [AWS Lambda Pricing](https://aws.amazon.com/lambda/pricing/)
-
-
