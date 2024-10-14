@@ -43,7 +43,7 @@ class AnalyzeService {
                     yield this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
                     if (process.env.REDACT_ORIGINAL_AUDIO === "true") {
                         // Call Lambda function to redact PII in the audio recording
-                        yield this.redactAudioRecording(originalObjectKey, this.getPIITimeStamps(parsedBody));
+                        yield this.redactAudioRecording(originalObjectKey, this.getPiiIdentificationTimeStamps(parsedBody));
                     }
                     return {
                         message: "PII detected in call recording.",
@@ -52,7 +52,7 @@ class AnalyzeService {
                         audioUri: `s3://${audioBucket}/${originalObjectKey}`,
                         transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
                         transcriptText: transcriptText,
-                        identifications: this.getTranscriptionPIIResults(parsedBody)
+                        piiIdentifications: this.getTranscriptionPiiIdentificationResults(parsedBody)
                     };
                 }
                 // No PII detected
@@ -103,12 +103,12 @@ class AnalyzeService {
             });
         });
     }
-    getPIITimeStamps(data) {
+    getPiiIdentificationTimeStamps(data) {
         if (data.results.items.length === 0) {
             return [];
         }
         let piiTimeStamps = [];
-        const results = this.getTranscriptionPIIResults(data);
+        const results = this.getTranscriptionPiiIdentificationResults(data);
         for (const result of results) {
             if (result.type === process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG) {
                 piiTimeStamps.push({
@@ -119,7 +119,7 @@ class AnalyzeService {
         }
         return piiTimeStamps;
     }
-    getTranscriptionPIIResults(data) {
+    getTranscriptionPiiIdentificationResults(data) {
         if (data.results.items.length === 0) {
             return [];
         }
