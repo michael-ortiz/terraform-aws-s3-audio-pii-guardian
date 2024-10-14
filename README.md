@@ -6,7 +6,7 @@ You have the option to automatically run PII (Personal Identifiable Information)
 
 We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) service to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
 
-If PII is detected, a process will redact and mute the PII information in the original audio file. You can optionally turn this off.
+If PII is detected, a process will redact and mute the PII information in the original audio file using [FFmpeg](https://www.ffmpeg.org/). You can optionally turn this off.
 
 Below are the types of information that AWS Transcribe can detct:
 
