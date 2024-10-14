@@ -105,3 +105,16 @@ Example:
 ```
 https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
 ```
+
+**Response:**
+
+```
+{
+    "message": "PII detected in call recording",
+    "containsPII": true,
+    "audioUri": "s3://audio-recordings-bucket-7574/recording-test.wav",
+    "redactedAudioUri": "s3://audio-recordings-bucket-7574/redacted/recording-test.wav",
+    "transcriptUri": "s3://audio-recordings-pii-transcriptions-bucket-7574/recording-test.wav",
+    "transcript": "Hello, my name is [PII]. My credit card number is [PII]. My social security is [PII]."
+}
+```
