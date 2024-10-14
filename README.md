@@ -22,6 +22,8 @@ Below are the types of information that AWS Transcribe can detct:
 * PIN
 * SSN
 
+You can optionally configure the data you want to detect and redact in `configs.tf`
+
 # Architecture 🏗️
 
 ## Services Used
