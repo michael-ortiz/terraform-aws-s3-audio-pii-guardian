@@ -1,6 +1,6 @@
 import os
 import json
-import boto3
+import boto3 # type: ignore due to library being included in the AWS Lambda runtime
 
 s3 = boto3.client('s3')
 
