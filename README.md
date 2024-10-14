@@ -1,12 +1,14 @@
-# s3-audio-recordings-pii-analyzer
+# aws-s3-audio-pii-guardian 🔒
 
 This project allows you to provision the necesary infrastructure to enable you to detect PII information in audio voice recordings stored in S3.
 
-You have the option to automatically run PII detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API.
+You have the option to automatically run PII detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API for existing objects.
 
-We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) Services to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
+We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) service to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
 
-# Architecture 
+If PII is detected, a process will redact and mute the PII information in the original audio file. You can optionally turn this off.
+
+# Architecture 🏗️
 
 ## Services Used
 
@@ -24,20 +26,20 @@ We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) Services t
 
 # Automatic Analysis
 
-Steps: Insert audio audio recording in S3 bucket:
+Steps: Insert audio audio recording in S3 bucket.
 
 ```
-audio-recordings-bucket-####
+audio-bucket-####
 ```
 
 You must specify the audio file extension in `configs.tf`. Default value is `.wav`.
 
 
-## Configuration
+# Configuration
 
 Head over to `configs.tf` to see all options before you deploy. You can use default values, or modify them per your needs.
 
-## Deployment
+# Deployment 🚀
 
 This is a Terraform project that you can use and test out on your own.
 
@@ -50,7 +52,7 @@ terraform init
 terraform apply
 ```
 
-## Modying Lambdas
+# Modying Lambdas 📝
 
 You can optionally modify the lambdas to your needs. 
 
@@ -61,7 +63,7 @@ make build-lambdas
 terraform apply
 ```
 
-# API
+# API 👨‍💻
 
 Get API urls from Terraform Output.
 
@@ -125,7 +127,9 @@ https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
 }
 ```
 
-# Cost of Usage
+# Cost of Usage 💰
+
+Pricing varies based on usage and is based on pay-as-you-go model. Be sure you understand the pricing before you use the services at scale.
 
 ## AWS Transcribe Pricing
 
