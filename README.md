@@ -116,10 +116,11 @@ https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
 
 ```
 {
-    "message": "PII detected in call recording",
+    "message": "PII detected in call recording.",
     "containsPII": true,
-    "audioUri": "s3://audio-recordings-bucket-####/{AUDIO_FILE_NAME}",
-    "transcriptUri": "s3://audio-recordings-pii-transcriptions-bucket-####/{AUDIO_FILE_NAME}",
+    "redactOriginalAudio": true,
+    "audioUri": "s3://audio-recordings-bucket-7574/recording-test.wav",
+    "transcriptUri": "s3://audio-recordings-pii-transcriptions-bucket-7574/recording-test.wav",
     "transcript": "Hello, my name is [PII]. My credit card number is [PII]. My social security is [PII]."
 }
 ```
