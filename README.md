@@ -6,7 +6,13 @@ You have the option to automatically run PII detection jobs when a new audio fil
 
 We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) Services to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
 
-# Architecture
+# Architecture 
+
+## Services Used
+
+* AWS S3 (storage)
+* AWS Lambda (backend)
+* AWS Transribe (transcriptions + PII detection)
 
 ## Use Case 1: Automatic Detection on New Objects in S3
 
@@ -117,3 +123,23 @@ https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
     "transcript": "Hello, my name is [PII]. My credit card number is [PII]. My social security is [PII]."
 }
 ```
+
+# Cost of Usage
+
+## AWS Transcribe Pricing
+
+As of October 13, 2024 for `us-east-1`. 
+
+See [Amazon Transcribe Pricing](https://aws.amazon.com/transcribe/pricing/) for most up to date pricing.
+
+<img width="850" alt="Screenshot 2024-10-13 at 9 38 59 PM" src="https://github.com/user-attachments/assets/2d4ff751-bf80-43c6-9495-f8305ad2b99b">
+
+## AWS S3 Pricing
+
+See [AWS S3 Pricing](https://aws.amazon.com/s3/pricing/)
+
+## Lambda Pricing
+
+See [AWS Lambda Pricing](https://aws.amazon.com/lambda/pricing/)
+
+
