@@ -1,11 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { LanguageCode, MediaFormat, PiiEntityType, StartTranscriptionJobCommand, StartTranscriptionJobCommandInput, TranscribeClient } from "@aws-sdk/client-transcribe";
+import { Jobs, TranscriptionResponse } from '../interfaces/Interfaces';
 
-interface Jobs {
-  jobId: string,
-  s3Uri: string
-  error?: any
-}
 
 export enum EventType {
   S3 = 's3',
@@ -20,7 +16,7 @@ export class TranscribeService {
     this.transcribeClient = new TranscribeClient({ region: process.env.AWS_REGION });
   }
 
-  async transcribeAudioRecording(s3ObjectKeys: string[], languageCode?: string): Promise<any> {
+  async transcribeAudioRecording(s3ObjectKeys: string[], languageCode?: string): Promise<TranscriptionResponse> {
 
     let startedJobs: Jobs[] = [];
     let failedJobs: Jobs[] = [];
@@ -56,30 +52,25 @@ export class TranscribeService {
         );
 
         // Add the job to the started jobs array
-        startedJobs.push({
-          jobId: jobId,
-          s3Uri: s3Uri,
-        });
 
-        console.log({
+        const response = {
           message: `Transcription job started successfully`,
           jobId: jobId,
           s3Uri: s3Uri
-        });
+        }
+        console.log(response);
+        startedJobs.push(response);
+
       } catch (err) {
 
-        failedJobs.push({
+        const errorResponse = {
+          message: `Error starting transcription job. Make sure object exists in the bucket.`,
           jobId: jobId,
           s3Uri: s3Uri,
           error: err
-        });
-
-        console.error({
-          message: `Error starting transcription job`,
-          jobId: jobId,
-          s3Uri: s3Uri,
-          error: err
-        });
+        }
+        console.error(errorResponse);
+        failedJobs.push(errorResponse);
       }
     }
 

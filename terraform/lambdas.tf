@@ -101,6 +101,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
         Action = [
           "s3:PutObject",
           "s3:Get*",
+          "s3:ListBucket"
         ],
         Effect = "Allow",
         Resource = [

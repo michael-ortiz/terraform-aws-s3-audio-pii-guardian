@@ -48,28 +48,23 @@ class TranscribeService {
                     };
                     yield this.transcribeClient.send(new client_transcribe_1.StartTranscriptionJobCommand(params));
                     // Add the job to the started jobs array
-                    startedJobs.push({
-                        jobId: jobId,
-                        s3Uri: s3Uri,
-                    });
-                    console.log({
+                    const response = {
                         message: `Transcription job started successfully`,
                         jobId: jobId,
                         s3Uri: s3Uri
-                    });
+                    };
+                    console.log(response);
+                    startedJobs.push(response);
                 }
                 catch (err) {
-                    failedJobs.push({
+                    const errorResponse = {
+                        message: `Error starting transcription job. Make sure object exists in the bucket.`,
                         jobId: jobId,
                         s3Uri: s3Uri,
                         error: err
-                    });
-                    console.error({
-                        message: `Error starting transcription job`,
-                        jobId: jobId,
-                        s3Uri: s3Uri,
-                        error: err
-                    });
+                    };
+                    console.error(errorResponse);
+                    failedJobs.push(errorResponse);
                 }
             }
             return {

@@ -28,3 +28,15 @@ export interface MuteTimestamps {
   start_time: string,
   end_time: string
 }
+
+export interface Jobs {
+  message: string,
+  jobId: string,
+  s3Uri: string
+  error?: any
+}
+
+export interface TranscriptionResponse {
+  startedJobs: Jobs[],
+  jobErrors: Jobs[]
+}
