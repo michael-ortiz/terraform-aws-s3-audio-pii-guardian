@@ -19,26 +19,26 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
 
   environment {
     variables = {
-      // Transcribe audio recordings lambda
+      // Transcribe audio recordings variables
       AUDIO_BUCKET          = aws_s3_bucket.audio.id
       TRANSCRIPTIONS_BUCKET = aws_s3_bucket.transcriptions.id
       PII_ENTITIES          = join(",", local.pii_entities)
       MEDIA_FORMAT          = local.media_format
       DEFAULT_LANGUAGE_CODE = local.default_language_code
 
-      // Analyze audio recordings lambda
+      // Analyze audio recordings variables
       SLACK_NOTIFICATIONS_WEBHOOK     = local.slack_notification_webhook
       AWS_TRANSCRIBE_REDACTED_PII_TAG = "[PII]" // This is the tag that is used if any PII is found in the transcription
       redacter_function_name          = try(aws_lambda_function.pii_audio_redacter_function[0].function_name, null)
 
       CURRENT_LAMBDA_NAME   = local.redacter_function_name
-      REDACT_ORIGINAL_AUDIO = local.redact_original_audio
+      REDACT_AUDIO = local.redact_audio
     }
   }
 }
 
 resource "aws_lambda_function" "pii_audio_redacter_function" {
-  count            = local.redact_original_audio ? 1 : 0
+  count            = local.redact_audio ? 1 : 0
   filename         = "${local.redact_audio_processor_lambda_path}/${local.lambda_zip_file_name}"
   function_name    = local.redacter_function_name
   role             = aws_iam_role.redact_pii_audio_recording_lambda.arn
@@ -55,6 +55,8 @@ resource "aws_lambda_function" "pii_audio_redacter_function" {
   environment {
     variables = {
       AUDIO_BUCKET = aws_s3_bucket.audio.id
+      REDACT_AUDIO = local.redact_audio
+      OVERWRITE_ORIGINAL_AUDIO = local.overwrite_original_audio
     }
   }
 }
@@ -125,7 +127,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
 }
 
 resource "aws_iam_policy" "pii_audio_api_handler_invoke_function" {
-  count       = local.redact_original_audio ? 1 : 0
+  count       = local.redact_audio ? 1 : 0
   name        = "${local.api_handler_function_name}-invoke-function-policy"
   description = "Policy to allow invoking the PII audio redacter function"
   policy = jsonencode({
@@ -180,7 +182,7 @@ resource "aws_iam_role_policy_attachment" "pii_audio_api_handler_function" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoke_lambda_policy_attachment" {
-  count      = local.redact_original_audio ? 1 : 0
+  count      = local.redact_audio ? 1 : 0
   role       = aws_iam_role.pii_audio_api_handler_function.name
   policy_arn = aws_iam_policy.pii_audio_api_handler_invoke_function[0].arn
 }

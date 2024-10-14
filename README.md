@@ -104,7 +104,7 @@ https://{ID}.lambda-url.us-east-1.on.aws/transcribe
   "s3ObjectKeys": [
     "{AUDIO_FILE_NAME}.wav"
   ],
-  languageCode: "en-US", // Optionally, override default language
+  languageCode: "en-US", // Optionally, overwrite default language
 }
 ```
 

@@ -5,6 +5,14 @@ import boto3
 s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
+
+    if os.environ.get('REDACT_AUDIO', 'false') == 'false' is None:
+        return {
+            "statusCode": 200,
+            "body": json.dumps({
+                "message": "Audio redaction is disabled"
+            })
+        }
     
     bucket_name =  os.environ.get('AUDIO_BUCKET')
     s3_object_key = event.get('s3ObjectKey')
@@ -40,6 +48,16 @@ def lambda_handler(event, context):
     # Apply the filter to the audio file
     os.system(f"/opt/bin/ffmpeg -i {audio_file} -af \"{filter_string}\" {saved_file}")
     
+
+    # Check if the original audio should be overwritten
+    if os.environ.get('OVERWRITE_ORIGINAL_AUDIO', 'false') == 'false':
+        # Split the file name and extension
+        file_name, file_extension = os.path.splitext(s3_object_key)
+        # Append -redacted to the file name
+        new_file_name = f"{file_name}-redacted{file_extension}"
+        # Update the s3_object_key
+        s3_object_key = new_file_name
+
     # Upload the redacted file to S3
     s3.upload_file(saved_file, bucket_name, s3_object_key)
 

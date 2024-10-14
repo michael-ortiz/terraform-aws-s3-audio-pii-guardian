@@ -1,6 +1,7 @@
 locals {
   current_account_id = data.aws_caller_identity.current.account_id
 }
+
 resource "aws_s3_bucket" "audio" {
   bucket        = "${var.audio_bucket_name}-${local.current_account_id}"
   force_destroy = true

@@ -5,8 +5,12 @@ locals {
   // Trigger the transcription of the audio recordings when they are put on S3 automatically
   auto_s3_put_trigger = true
 
-  // Will overwrite the original audio file with the redacted version
-  redact_original_audio = true
+  // Will redact (mute) PII information in the audio recordings
+  redact_audio = true
+
+  // Overwrite the original audio file with the redacted version
+  // If set to false, the redacted audio will be saved with -redacted suffix
+  overwrite_original_audio = false
 
   // Define a default language options for the audio transcription
   default_language_code = "en-US"
