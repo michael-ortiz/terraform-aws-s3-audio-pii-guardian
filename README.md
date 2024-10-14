@@ -51,7 +51,7 @@ You can optionally modify the lambdas to your needs.
 To build and deploy a lambda, execute the following commands:
 
 ```
-npm run --prefix lambdas/{LAMBDA_FOLDER_NAME} build
+make build-lambdas
 terraform apply
 ```
 
@@ -86,6 +86,7 @@ https://{ID}.lambda-url.us-east-1.on.aws/transcribe
     "startedJobs": [
         {
             "jobId": "34def188-a1b8-4ed7-9822-4f1bf763bfd0",
+            "s3ObjectKey": "{AUDIO_FILE_NAME}.wav",
             "s3Uri": "s3://audio-recordings-bucket-####/{AUDIO_FILE_NAME}.wav"
         }
     ],
@@ -102,5 +103,5 @@ Method: `GET`
 
 Example:
 ```
-https://{ID}.lambda-url.us-east-1.on.aws/analyze/{AUDIO_FILE_NAME}
+https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
 ```
