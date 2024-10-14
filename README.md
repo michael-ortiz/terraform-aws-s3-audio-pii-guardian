@@ -2,11 +2,25 @@
 
 This project allows you to provision the necesary infrastructure to enable you to detect PII information in audio voice recordings stored in S3.
 
-You have the option to automatically run PII detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API for existing objects.
+You have the option to automatically run PII (Personal Identifiable Information) detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API for existing objects.
 
 We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) service to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
 
 If PII is detected, a process will redact and mute the PII information in the original audio file. You can optionally turn this off.
+
+Below are the types of information that AWS Transcribe can detct:
+
+* ADDRESS
+* BANK_ACCOUNT_NUMBER
+* BANK_ROUTING
+* CREDIT_DEBIT_CVV
+* CREDIT_DEBIT_EXPIRY
+* CREDIT_DEBIT_NUMBER
+* EMAIL
+* NAME
+* PHONE
+* PIN
+* SSN
 
 # Architecture 🏗️
 
