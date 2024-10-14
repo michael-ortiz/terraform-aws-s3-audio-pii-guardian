@@ -8,15 +8,13 @@ We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) Services t
 
 # Architecture
 
-Note: SNS Notifications Pending
-
 ## Use Case 1: Automatic Detection on New Objects in S3
-<img width="1361" alt="architecture-usecase-1" src="https://github.com/user-attachments/assets/441755a6-c0e7-4fea-8e44-86c565b32de5">
 
+<img width="1353" alt="Screenshot 2024-10-13 at 9 31 19 PM" src="https://github.com/user-attachments/assets/b9eea3c3-a628-455e-a715-cb923f02c1f8">
 
 ## Use Case 2: Manual Trigger on Existing S3 Objects using API
 
-<img width="690" alt="architecture-usecase-2" src="https://github.com/user-attachments/assets/11e1d03a-3015-4fa9-8cef-77455aa5de83">
+<img width="820" alt="Screenshot 2024-10-13 at 9 31 33 PM" src="https://github.com/user-attachments/assets/1f4903b7-c644-420d-a7bd-f9f2c21e2ae1">
 
 # Automatic Analysis
 
