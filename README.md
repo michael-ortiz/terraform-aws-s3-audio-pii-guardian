@@ -209,6 +209,12 @@ As of October 13, 2024 for `us-east-1`.
 
 See [Amazon Transcribe Pricing](https://aws.amazon.com/transcribe/pricing/) for most up to date pricing.
 
+Since we will transcribe calls and also redact PII, both pricings will apply.
+
+### Standard Pricing
+<img width="870" alt="Screenshot 2024-10-14 at 11 37 24 AM" src="https://github.com/user-attachments/assets/fa0fda3a-3a5c-4a85-998f-6174482e028f">
+
+### PII Redaction Pricing
 <img width="850" alt="Screenshot 2024-10-13 at 9 38 59 PM" src="https://github.com/user-attachments/assets/2d4ff751-bf80-43c6-9495-f8305ad2b99b">
 
 ## AWS S3 Pricing
