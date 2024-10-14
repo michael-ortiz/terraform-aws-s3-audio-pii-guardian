@@ -137,7 +137,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_invoke_function" {
         ],
         Effect = "Allow",
         Resource = [
-          aws_lambda_function.pii_audio_redacter_function[0].arn, null
+          aws_lambda_function.pii_audio_redacter_function[0].arn
         ]
       }
     ]

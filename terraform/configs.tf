@@ -6,7 +6,7 @@ locals {
   auto_s3_put_trigger = true
 
   // Will overwrite the original audio file with the redacted version
-  redact_original_audio = false
+  redact_original_audio = true
 
   // Define a default language options for the audio transcription
   default_language_code = "en-US"
