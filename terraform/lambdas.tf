@@ -25,18 +25,18 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
       // Transcribe audio recordings variables
       AUDIO_BUCKET              = aws_s3_bucket.audio.id
       TRANSCRIPTIONS_BUCKET     = aws_s3_bucket.transcriptions.id
-      PII_ENTITIES              = join(",", local.pii_entities)
-      MEDIA_FORMAT              = local.media_format
-      DEFAULT_LANGUAGE_CODE     = local.default_language_code
-      TRANSCRIBE_PROBABILITY    = local.auto_transcribe_probability_percent
-      TRANSCRIPTION_FILE_SUFFIX = local.transcriptions_file_suffix
+      PII_ENTITIES              = join(",", var.pii_entities)
+      MEDIA_FORMAT              = var.media_format
+      DEFAULT_LANGUAGE_CODE     = var.default_language_code
+      TRANSCRIBE_PROBABILITY    = var.auto_transcribe_probability_percent
+      TRANSCRIPTION_FILE_SUFFIX = var.transcriptions_file_suffix
 
       // Analyze audio recordings variables
-      NOTIFICATIONS_WEBHOOK           = local.notification_webhook_url
-      SLACK_NOTIFICATIONS_WEBHOOK     = local.slack_notification_webhook_url
+      NOTIFICATIONS_WEBHOOK           = var.notification_webhook_url
+      SLACK_NOTIFICATIONS_WEBHOOK     = var.slack_notification_webhook_url
       AWS_TRANSCRIBE_REDACTED_PII_TAG = "[PII]" // This is the tag that is used if any PII is found in the transcription. Do not change this value
-      REDACT_AUDIO                    = local.redact_audio
-      OVERWRITE_ORIGINAL_AUDIO        = local.overwrite_original_audio
+      REDACT_AUDIO                    = var.redact_audio
+      OVERWRITE_ORIGINAL_AUDIO        = var.overwrite_original_audio
 
       // Lambda function names
       REDACTOR_FUNCTION_NAME = local.redactor_function_name
@@ -48,7 +48,7 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
 }
 
 resource "aws_lambda_function" "pii_audio_redactor_function" {
-  count            = local.redact_audio ? 1 : 0
+  count            = var.redact_audio ? 1 : 0
   filename         = "${local.redact_audio_processor_lambda_path}/${local.lambda_zip_file_name}"
   function_name    = local.redactor_function_name
   role             = aws_iam_role.redact_pii_audio_recording_lambda.arn
@@ -65,8 +65,8 @@ resource "aws_lambda_function" "pii_audio_redactor_function" {
   environment {
     variables = {
       AUDIO_BUCKET             = aws_s3_bucket.audio.id
-      REDACT_AUDIO             = local.redact_audio
-      OVERWRITE_ORIGINAL_AUDIO = local.overwrite_original_audio
+      REDACT_AUDIO             = var.redact_audio
+      OVERWRITE_ORIGINAL_AUDIO = var.overwrite_original_audio
     }
   }
 
@@ -77,12 +77,10 @@ resource "aws_lambda_function" "pii_audio_redactor_function" {
 
 resource "aws_cloudwatch_log_group" "pii_audio_api_handler_log_group" {
   name              = "/aws/lambda/${local.api_handler_function_name}"
-  retention_in_days = 14
 }
 
 resource "aws_cloudwatch_log_group" "pii_audio_redactor_log_group" {
   name              = "/aws/lambda/${local.redactor_function_name}"
-  retention_in_days = 14
 }
 
 ## IAM Roles
@@ -156,7 +154,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
 }
 
 resource "aws_iam_policy" "pii_audio_api_handler_invoke_function" {
-  count       = local.redact_audio ? 1 : 0
+  count       = var.redact_audio ? 1 : 0
   name        = "${local.api_handler_function_name}-invoke-function-policy"
   description = "Policy to allow invoking the PII audio redactor function"
   policy = jsonencode({
@@ -215,7 +213,7 @@ resource "aws_iam_role_policy_attachment" "pii_audio_api_handler_function" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoke_lambda_policy_attachment" {
-  count      = local.redact_audio ? 1 : 0
+  count      = var.redact_audio ? 1 : 0
   role       = aws_iam_role.pii_audio_api_handler_function.name
   policy_arn = aws_iam_policy.pii_audio_api_handler_invoke_function[0].arn
 }
@@ -246,7 +244,7 @@ resource "aws_lambda_permission" "s3_recordings_transcriptions_trigger_permissio
 // Function URL
 resource "aws_lambda_function_url" "pii_audio_api_handler_function" {
   function_name      = aws_lambda_function.pii_audio_api_handler_function.function_name
-  authorization_type = local.api_authorization_type
+  authorization_type = var.api_authorization_type
 }
 
 // FFmpeg Layer
@@ -256,6 +254,8 @@ resource "aws_lambda_layer_version" "ffmpeg_layer" {
   depends_on = [null_resource.build_ffmpeg_layer]
 }
 
+
+// Build Lambda Zip Files
 data "archive_file" "lambda_zip_api_handler" {
   type        = "zip"
   output_path = "${local.pii_audio_api_handler_function_path}/${local.lambda_zip_file_name}"

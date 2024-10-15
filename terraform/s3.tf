@@ -13,13 +13,13 @@ resource "aws_s3_bucket" "transcriptions" {
 }
 
 resource "aws_s3_bucket_notification" "audio_notification" {
-  count  = local.auto_transcribe_on_s3_put ? 1 : 0
+  count  = var.auto_transcribe_on_s3_put ? 1 : 0
   bucket = aws_s3_bucket.audio.id
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.pii_audio_api_handler_function.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = ".${local.media_format}"
+    filter_suffix       = ".${var.media_format}"
   }
 
   depends_on = [aws_lambda_permission.s3_recordings_trigger_permission]
@@ -31,7 +31,7 @@ resource "aws_s3_bucket_notification" "transcriptions_notifications" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.pii_audio_api_handler_function.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_suffix       = local.transcriptions_file_suffix
+    filter_suffix       = var.transcriptions_file_suffix
   }
 
   depends_on = [aws_lambda_permission.s3_recordings_transcriptions_trigger_permission]
