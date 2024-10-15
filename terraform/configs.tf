@@ -7,6 +7,7 @@ locals {
 
   // Define a probability to automatically transcribe the audio recordings (0%-100%)
   // This can be used to only sample a percentage of the recordings
+  // If set to 100, all recordings will be transcribed (use with caution and watch the costs)
   auto_transcribe_probability_percent = 100
 
   // Will redact (mute) PII information in the audio recordings
