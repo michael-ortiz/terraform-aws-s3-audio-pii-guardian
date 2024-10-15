@@ -45,12 +45,9 @@ export class AnalyzeService {
       // Check if the transcription contains the redacted PII tag
       if (transcriptText.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG!)) {
 
+        // Call Lambda function to redact PII in the audio recording
+        await this.redactAudioRecording(originalObjectKey, this.getPiiIdentificationTimeStamps(parsedBody));
 
-        if (process.env.REDACT_AUDIO === "true") {
-          // Call Lambda function to redact PII in the audio recording
-          await this.redactAudioRecording(originalObjectKey, this.getPiiIdentificationTimeStamps(parsedBody));
-        }
-        
         const response = {
           message: "PII detected in call recording.",
           containsPII: true,
@@ -84,6 +81,11 @@ export class AnalyzeService {
 
   private async redactAudioRecording(s3ObjectKey: string, muteTimeStamps: any): Promise<void> {
 
+    if (process.env.REDACT_AUDIO !== "true") {
+      console.log("Redact audio is disabled. Skipping...");
+      return;
+    }
+
     const lambdaParams = {
       FunctionName: process.env.REDACTOR_FUNCTION_NAME!,
       InvocationType: InvocationType.Event,
@@ -93,8 +95,9 @@ export class AnalyzeService {
       })
     };
 
-    try {
+    try { 
       // Invoke the lambda function
+      console.log("Calling Redact Audio Processor Lambda...");
       await this.lambdaClient.send(new InvokeCommand(lambdaParams));
     } catch (error) {
       console.error({

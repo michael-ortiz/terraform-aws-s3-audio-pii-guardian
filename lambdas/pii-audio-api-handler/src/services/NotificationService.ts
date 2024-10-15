@@ -30,7 +30,7 @@ export class NotificationService {
 
   async sendSlackNotification(objectKey: string, bucketName: string): Promise<void> {
 
-    if (this.isWebhookURLValid(process.env.SLACK_NOTIFICATIONS_WEBHOOK)) {
+    if (!this.isWebhookURLValid(process.env.SLACK_NOTIFICATIONS_WEBHOOK)) {
       return;
     }
 

@@ -47,23 +47,23 @@ const s3EventHandler = async (records: S3EventRecord[]) => {
 
     const objectKey = record.s3.object.key;
 
-    if (record.userIdentity.principalId.includes(process.env.CURRENT_LAMBDA_NAME!)) {
-      // Skip if the event source is the current lambda function as this event is only 
-      // triggered when re overriding the original audio redacted audio file.
-      // We don't want to trigger the transcription job again when the redacted audio file is uploaded.
-      const response = {
-        event: "SKIPPED_S3_EVENT",
-        objectKey,
-        message: "Event source is the current lambda function"
-      }
-      console.log(response);
-      return {
-        statusCode: 200,
-        body: JSON.stringify(response)
-      }
-    }
-
     if (record.s3.bucket.name == process.env.AUDIO_BUCKET) {
+
+      if (record.userIdentity.principalId.includes(process.env.CURRENT_LAMBDA_NAME!)) {
+        // Skip if the event source is the current lambda function as this event is only 
+        // triggered when re overriding the original audio redacted audio file.
+        // We don't want to trigger the transcription job again when the redacted audio file is uploaded.
+        const response = {
+          event: "SKIPPED_S3_EVENT",
+          objectKey,
+          message: "Will not trigger transcription job as the event source is the current lambda function."
+        }
+        console.log(response);
+        return {
+          statusCode: 200,
+          body: JSON.stringify(response)
+        }
+      }
 
       const response = await transcribeService.transcribeAudioRecording([objectKey]);
 
