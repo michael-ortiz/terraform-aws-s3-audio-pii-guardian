@@ -5,3 +5,5 @@ terraform.tfstate
 terraform.tfstate.backup
 docs
 dist
+lambda.zip
+layer

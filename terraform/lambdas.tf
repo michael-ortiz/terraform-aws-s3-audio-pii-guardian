@@ -14,7 +14,7 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
   function_name    = local.api_handler_function_name
   role             = aws_iam_role.pii_audio_api_handler_function.arn
   handler          = "dist/index.handler"
-  source_code_hash = filesha256("${local.pii_audio_api_handler_function_path}/${local.lambda_zip_file_name}")
+  source_code_hash = data.archive_file.lambda_zip_api_handler.output_sha512
 
   runtime = "nodejs20.x"
 
@@ -40,6 +40,8 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
       CURRENT_LAMBDA_NAME    = local.api_handler_function_name
     }
   }
+
+  depends_on = [null_resource.build_package_lambdas]
 }
 
 resource "aws_lambda_function" "pii_audio_redactor_function" {
@@ -48,7 +50,7 @@ resource "aws_lambda_function" "pii_audio_redactor_function" {
   function_name    = local.redactor_function_name
   role             = aws_iam_role.redact_pii_audio_recording_lambda.arn
   handler          = "app.lambda_handler"
-  source_code_hash = filesha256("${local.redact_audio_processor_lambda_path}/${local.lambda_zip_file_name}")
+  source_code_hash = data.archive_file.lambda_zip_redactor.output_sha512
 
   timeout = 300
 
@@ -64,6 +66,8 @@ resource "aws_lambda_function" "pii_audio_redactor_function" {
       OVERWRITE_ORIGINAL_AUDIO = local.overwrite_original_audio
     }
   }
+
+  depends_on = [null_resource.build_package_lambdas]
 }
 
 ## Log Groups
@@ -117,7 +121,8 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
         ],
         Effect = "Allow",
         Resource = [
-          aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn
+          aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn,
+          "${aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn}/*",
         ]
       },
       {
@@ -140,7 +145,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
         ],
         Effect = "Allow",
         Resource = [
-          ["*"]
+          "*"
         ]
       }
     ]
@@ -181,7 +186,8 @@ resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
         ],
         Effect = "Allow",
         Resource = [
-          aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn
+          aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn,
+          "${aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn}/*"
         ]
       },
       {
@@ -244,4 +250,37 @@ resource "aws_lambda_function_url" "pii_audio_api_handler_function" {
 resource "aws_lambda_layer_version" "ffmpeg_layer" {
   filename   = "${local.redact_audio_processor_lambda_path}/layer/ffmpeg.zip"
   layer_name = "ffmpeg"
+  depends_on = [ null_resource.build_ffmpeg_layer ]
+}
+
+data "archive_file" "lambda_zip_api_handler" {
+  type        = "zip"
+  output_path = "${local.pii_audio_api_handler_function_path}/${local.lambda_zip_file_name}"
+  source_dir  = local.pii_audio_api_handler_function_path
+  depends_on  = [null_resource.build_package_lambdas]
+  excludes = [
+    local.lambda_zip_file_name
+  ]
+}
+
+data "archive_file" "lambda_zip_redactor" {
+  type        = "zip"
+  output_path = "${local.redact_audio_processor_lambda_path}/${local.lambda_zip_file_name}"
+  source_dir  = local.redact_audio_processor_lambda_path
+  excludes = [
+    local.lambda_zip_file_name
+  ]
+  depends_on  = [null_resource.build_ffmpeg_layer]
+}
+
+resource "null_resource" "build_package_lambdas" {
+  provisioner "local-exec" {
+    command = "cd ../ && make install-lambdas-dependencies && make build-lambdas"
+  }
+}
+
+resource "null_resource" "build_ffmpeg_layer" {
+  provisioner "local-exec" {
+    command = "cd ../ && make create-ffmpeg-layer"
+  }
 }

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc && npm run zip",
+    "build": "tsc",
     "zip": "rm -rf lambda.zip && zip -r lambda.zip . > /dev/null",
     "start": "node dist/index.js",
     "watch": "tsc -w"
