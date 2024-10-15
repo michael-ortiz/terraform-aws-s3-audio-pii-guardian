@@ -143,12 +143,12 @@ data "archive_file" "lambda_zip_redactor" {
 
 resource "null_resource" "build_package_lambdas" {
   provisioner "local-exec" {
-    command = "make install-lambdas-dependencies && make build-lambdas"
+    command = "cd ${path.module} && make install-lambdas-dependencies && make build-lambdas"
   }
 }
 
 resource "null_resource" "build_ffmpeg_layer" {
   provisioner "local-exec" {
-    command = "make create-ffmpeg-layer"
+    command = "cd ${path.module} && make create-ffmpeg-layer"
   }
 }
