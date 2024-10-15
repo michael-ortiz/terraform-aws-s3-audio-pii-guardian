@@ -1,6 +1,6 @@
 locals {
-  pii_audio_api_handler_function_path = "../${path.module}/lambdas/pii-audio-api-handler"
-  redact_audio_processor_lambda_path  = "../${path.module}/lambdas/pii-audio-redactor"
+  pii_audio_api_handler_function_path = "${path.module}/lambdas/pii-audio-api-handler"
+  redact_audio_processor_lambda_path  = "${path.module}/lambdas/pii-audio-redactor"
 
   api_handler_function_name = "pii-audio-api-handler-function"
   redactor_function_name    = "pii-audio-redactor-function"
@@ -143,12 +143,12 @@ data "archive_file" "lambda_zip_redactor" {
 
 resource "null_resource" "build_package_lambdas" {
   provisioner "local-exec" {
-    command = "cd ../ && make install-lambdas-dependencies && make build-lambdas"
+    command = "make install-lambdas-dependencies && make build-lambdas"
   }
 }
 
 resource "null_resource" "build_ffmpeg_layer" {
   provisioner "local-exec" {
-    command = "cd ../ && make create-ffmpeg-layer"
+    command = "make create-ffmpeg-layer"
   }
 }
