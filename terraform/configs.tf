@@ -5,6 +5,10 @@ locals {
   // Trigger the transcription of the audio recordings when they are put on S3 automatically
   auto_transcribe_on_s3_put = true
 
+  // Define a probability to automatically transcribe the audio recordings (0%-100%)
+  // This can be used to only sample a percentage of the recordings
+  auto_transcribe_probability_percent = 100
+
   // Will redact (mute) PII information in the audio recordings
   redact_audio = true
 

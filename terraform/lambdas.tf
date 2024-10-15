@@ -21,11 +21,13 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
   environment {
     variables = {
       // Transcribe audio recordings variables
-      AUDIO_BUCKET          = aws_s3_bucket.audio.id
-      TRANSCRIPTIONS_BUCKET = aws_s3_bucket.transcriptions.id
-      PII_ENTITIES          = join(",", local.pii_entities)
-      MEDIA_FORMAT          = local.media_format
-      DEFAULT_LANGUAGE_CODE = local.default_language_code
+      AUDIO_BUCKET              = aws_s3_bucket.audio.id
+      TRANSCRIPTIONS_BUCKET     = aws_s3_bucket.transcriptions.id
+      PII_ENTITIES              = join(",", local.pii_entities)
+      MEDIA_FORMAT              = local.media_format
+      DEFAULT_LANGUAGE_CODE     = local.default_language_code
+      TRANSCRIBE_PROBABILITY    = local.auto_transcribe_probability_percent
+      TRANSCRIPTION_FILE_SUFFIX = local.transcriptions_file_suffix
 
       // Analyze audio recordings variables
       NOTIFICATIONS_WEBHOOK           = local.notification_webhook_url
@@ -113,7 +115,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Effect   = "Allow",
+        Effect = "Allow",
         Resource = [
           aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn
         ]
@@ -177,7 +179,7 @@ resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Effect   = "Allow",
+        Effect = "Allow",
         Resource = [
           aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn
         ]

@@ -3,6 +3,7 @@ import ServerlessHttp from 'serverless-http';
 import { AnalyzeService } from './services/AnalyzeService';
 import { EventType, TranscribeService } from './services/TranscribeService';
 import { APIGatewayEvent, S3EventRecord } from 'aws-lambda';
+import { shouldTranscribeBasedOnProbability } from './utils/Utils';
 
 const app = express();
 app.use(express.json())
@@ -47,14 +48,28 @@ const s3EventHandler = async (records: S3EventRecord[]) => {
 
     const objectKey = record.s3.object.key;
 
+    // Audio Put S3 Event
     if (record.s3.bucket.name == process.env.AUDIO_BUCKET) {
+
+      if (shouldTranscribeBasedOnProbability(Number(process.env.TRANSCRIBE_PROBABILITY!))) {
+        const response = {
+          event: "SKIPPED_TRANSCRIPTION",
+          objectKey,
+          message: "Will not trigger transcription job based on the probability."
+        }
+        console.log(response);
+        return {
+          statusCode: 200,
+          body: JSON.stringify(response)
+        }
+      }
 
       if (record.userIdentity.principalId.includes(process.env.CURRENT_LAMBDA_NAME!)) {
         // Skip if the event source is the current lambda function as this event is only 
         // triggered when re overriding the original audio redacted audio file.
         // We don't want to trigger the transcription job again when the redacted audio file is uploaded.
         const response = {
-          event: "SKIPPED_S3_EVENT",
+          event: "SKIPPED_TRANSCRIPTION_S3_EVENT",
           objectKey,
           message: "Will not trigger transcription job as the event source is the current lambda function."
         }
@@ -73,6 +88,7 @@ const s3EventHandler = async (records: S3EventRecord[]) => {
       }
     }
 
+    // Transcriptions Results Put S3 Event
     if (record.s3.bucket.name == process.env.TRANSCRIPTIONS_BUCKET) {
 
       const objectKey = record.s3.object.key;
