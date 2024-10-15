@@ -51,13 +51,13 @@ export class AnalyzeService {
         const response = {
           message: "PII detected in call recording.",
           containsPII: true,
-          redactOriginalAudio: process.env.REDACT_AUDIO === "true",
+          redactOriginalAudio: process.env.OVERWRITE_ORIGINAL_AUDIO === "true",
           audioUri: `s3://${audioBucket}/${originalObjectKey}`,
           transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
           transcriptText: transcriptText,
           piiIdentifications: this.getTranscriptionPiiIdentificationResults(parsedBody)
         }
-
+        
         await this.notifications.sendWebhookNotification(response);
         await this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
 

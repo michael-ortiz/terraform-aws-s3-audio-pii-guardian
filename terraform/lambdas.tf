@@ -36,6 +36,7 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
       SLACK_NOTIFICATIONS_WEBHOOK     = local.slack_notification_webhook_url
       AWS_TRANSCRIBE_REDACTED_PII_TAG = "[PII]" // This is the tag that is used if any PII is found in the transcription. Do not change this value
       REDACT_AUDIO                    = local.redact_audio
+      OVERWRITE_ORIGINAL_AUDIO        = local.overwrite_original_audio
 
       // Lambda function names
       REDACTOR_FUNCTION_NAME = local.redactor_function_name
@@ -252,7 +253,7 @@ resource "aws_lambda_function_url" "pii_audio_api_handler_function" {
 resource "aws_lambda_layer_version" "ffmpeg_layer" {
   filename   = "${local.redact_audio_processor_lambda_path}/layer/ffmpeg.zip"
   layer_name = "ffmpeg"
-  depends_on = [ null_resource.build_ffmpeg_layer ]
+  depends_on = [null_resource.build_ffmpeg_layer]
 }
 
 data "archive_file" "lambda_zip_api_handler" {
@@ -272,7 +273,7 @@ data "archive_file" "lambda_zip_redactor" {
   excludes = [
     local.lambda_zip_file_name
   ]
-  depends_on  = [null_resource.build_ffmpeg_layer]
+  depends_on = [null_resource.build_ffmpeg_layer]
 }
 
 resource "null_resource" "build_package_lambdas" {
