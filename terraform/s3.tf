@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "transcriptions" {
 }
 
 resource "aws_s3_bucket_notification" "audio_notification" {
-  count = local.auto_s3_put_trigger ? 1 : 0
+  count = local.auto_s3_put_trigger_analysis ? 1 : 0
   bucket = aws_s3_bucket.audio.id
 
   lambda_function {

@@ -8,6 +8,7 @@ locals {
   lambda_zip_file_name = "lambda.zip"
 }
 
+# Lambda Functions
 resource "aws_lambda_function" "pii_audio_api_handler_function" {
   filename         = "${local.pii_audio_api_handler_function_path}/${local.lambda_zip_file_name}"
   function_name    = local.api_handler_function_name
@@ -63,6 +64,19 @@ resource "aws_lambda_function" "pii_audio_redactor_function" {
   }
 }
 
+## Log Groups
+
+resource "aws_cloudwatch_log_group" "pii_audio_api_handler_log_group" {
+  name              = "/aws/lambda/${local.api_handler_function_name}"
+  retention_in_days = 14
+}
+
+resource "aws_cloudwatch_log_group" "pii_audio_redactor_log_group" {
+  name              = "/aws/lambda/${local.redactor_function_name}"
+  retention_in_days = 14
+}
+
+## IAM Roles
 resource "aws_iam_role" "pii_audio_api_handler_function" {
   name               = "pii_audio_api_handler_function_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
@@ -73,6 +87,7 @@ resource "aws_iam_role" "redact_pii_audio_recording_lambda" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
+## IAM Policies
 data "aws_iam_policy_document" "lambda_assume_role" {
   statement {
     effect = "Allow"
@@ -99,7 +114,9 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
           "logs:PutLogEvents"
         ],
         Effect   = "Allow",
-        Resource = "arn:aws:logs:*:*:*"
+        Resource = [
+          aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn
+        ]
       },
       {
         Action = [
@@ -121,7 +138,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
         ],
         Effect = "Allow",
         Resource = [
-          "*"
+          ["*"]
         ]
       }
     ]
@@ -161,7 +178,9 @@ resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
           "logs:PutLogEvents"
         ],
         Effect   = "Allow",
-        Resource = "arn:aws:logs:*:*:*"
+        Resource = [
+          aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn
+        ]
       },
       {
         Action = [
@@ -178,6 +197,7 @@ resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
   })
 }
 
+## IAM Role Policy Attachments
 resource "aws_iam_role_policy_attachment" "pii_audio_api_handler_function" {
   role       = aws_iam_role.pii_audio_api_handler_function.name
   policy_arn = aws_iam_policy.pii_audio_api_handler_function.arn
@@ -212,11 +232,13 @@ resource "aws_lambda_permission" "s3_recordings_transcriptions_trigger_permissio
   source_arn    = aws_s3_bucket.transcriptions.arn
 }
 
+// Function URL
 resource "aws_lambda_function_url" "pii_audio_api_handler_function" {
   function_name      = aws_lambda_function.pii_audio_api_handler_function.function_name
   authorization_type = local.api_authorization_type
 }
 
+// FFmpeg Layer
 resource "aws_lambda_layer_version" "ffmpeg_layer" {
   filename   = "${local.redact_audio_processor_lambda_path}/layer/ffmpeg.zip"
   layer_name = "ffmpeg"
