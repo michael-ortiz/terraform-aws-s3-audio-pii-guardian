@@ -3,7 +3,7 @@
 locals {
 
   // Trigger the transcription of the audio recordings when they are put on S3 automatically
-  auto_s3_put_trigger_analysis = true
+  auto_transcribe_on_s3_put = true
 
   // Will redact (mute) PII information in the audio recordings
   redact_audio = true
