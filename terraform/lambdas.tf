@@ -18,6 +18,8 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
 
   runtime = "nodejs20.x"
 
+  timeout = 30
+
   environment {
     variables = {
       // Transcribe audio recordings variables
