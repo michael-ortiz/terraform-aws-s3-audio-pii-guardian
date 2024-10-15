@@ -243,6 +243,7 @@ resource "aws_lambda_permission" "s3_recordings_transcriptions_trigger_permissio
 
 // Function URL
 resource "aws_lambda_function_url" "pii_audio_api_handler_function" {
+  count = var.create_api_endpoint ? 1 : 0
   function_name      = aws_lambda_function.pii_audio_api_handler_function.function_name
   authorization_type = var.api_authorization_type
 }

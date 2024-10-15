@@ -85,6 +85,12 @@ variable "pii_entities" {
   ]
 }
 
+variable "create_api_endpoint" {
+  description = "Create an API endpoint to interact with the Handler function"
+  type        = bool
+  default     = true
+}
+
 variable "api_authorization_type" {
   description = "Options: 'AWS_IAM' or 'NONE'. Default: Will be open to the public (use with caution and for testing purposes only)"
   type        = string
