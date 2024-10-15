@@ -13,8 +13,6 @@ const transcribeService = new TranscribeService();
 
 app.post('/transcribe', async (req: Request, res: Response) => {
 
-  console.log(JSON.stringify(req.body));
-
   const response = await transcribeService.transcribeAudioRecording(
     req.body.s3ObjectKeys,
     req.body.languageCode
