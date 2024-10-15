@@ -1,3 +1,3 @@
-build-lambdas:
-	npm run --prefix pii-audio-api-handler build
-	cd pii-audio-redacter && zip lambda.zip app.py
+build:
+	npm --prefix pii-audio-api-handler install && npm run --prefix pii-audio-api-handler build
+	cd pii-audio-redactor && zip lambda.zip app.py

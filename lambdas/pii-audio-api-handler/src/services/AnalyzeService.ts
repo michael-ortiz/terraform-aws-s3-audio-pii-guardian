@@ -85,7 +85,7 @@ export class AnalyzeService {
   private async redactAudioRecording(s3ObjectKey: string, muteTimeStamps: any): Promise<void> {
 
     const lambdaParams = {
-      FunctionName: process.env.redacter_function_name,
+      FunctionName: process.env.REDACTOR_FUNCTION_NAME!,
       InvocationType: InvocationType.Event,
       Payload: JSON.stringify({
         s3ObjectKey: s3ObjectKey,
