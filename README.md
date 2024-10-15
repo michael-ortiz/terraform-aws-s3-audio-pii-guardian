@@ -10,7 +10,7 @@ We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) service to
 
 If PII is detected, a process will redact and mute the PII information in the original audio file using [FFmpeg](https://www.ffmpeg.org/). You can optionally turn this feature off in the `configs.tf` settings.
 
-## Demo Video
+## Demo Video 🎬
 
 Watch the following video to see the process in action and how to deploy.
 
