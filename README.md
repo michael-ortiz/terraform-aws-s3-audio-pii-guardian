@@ -12,7 +12,7 @@ If PII is detected, a process will redact and mute the PII information in the or
 
 ## Demo Video 🎬
 
-Watch the following video to see the process in action and how to deploy.
+Watch the following video to see the process in action and how to deploy into your own AWS Account.
 
 https://www.youtube.com/watch?v=YHM4K2W-tfE
 
