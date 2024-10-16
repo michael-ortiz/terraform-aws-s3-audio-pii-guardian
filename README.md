@@ -78,6 +78,45 @@ terraform init
 terraform apply
 ```
 
+## Deploy Using a Terraform Module
+
+If you prefer to deploy the infrastrcuture using a standalone module, you can use our [Public Terraform Module](https://registry.terraform.io/modules/michael-ortiz/s3-audio-pii-guardian/aws/latest), and optionally pass any configurations.
+
+```
+module "s3-audio-pii-guardian" {
+  source  = "michael-ortiz/s3-audio-pii-guardian/aws"
+  version = "~> 1.0.0"
+
+  audio_bucket_name                   = "audio-bucket"
+  transcriptions_bucket_name          = "transcriptions-bucket"
+  auto_transcribe_on_s3_put           = true
+  auto_transcribe_probability_percent = 100
+  redact_audio                        = true
+  overwrite_original_audio            = false
+  default_language_code               = "en-US"
+  media_format                        = "wav"
+  transcriptions_file_suffix          = ".json"
+  notification_webhook_url            = ""
+  slack_notification_webhook_url      = ""
+  pii_entities = [
+    "ADDRESS",
+    "BANK_ACCOUNT_NUMBER",
+    "BANK_ROUTING",
+    "CREDIT_DEBIT_CVV",
+    "CREDIT_DEBIT_EXPIRY",
+    "CREDIT_DEBIT_NUMBER",
+    "EMAIL",
+    "NAME",
+    "PHONE",
+    "PIN",
+    "SSN",
+  ]
+  create_api_endpoint    = true
+  api_authorization_type = "NONE"
+}
+
+```
+
 # Modifying Lambdas 📝
 
 You can optionally modify the lambdas to your needs. 
