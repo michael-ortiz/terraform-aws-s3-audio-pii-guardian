@@ -108,6 +108,7 @@ module "s3-audio-pii-guardian" {
   ]
   create_api_endpoint    = true
   api_authorization_type = "NONE"
+  sentiment_analysis     = false
 }
 
 ```
