@@ -6,7 +6,7 @@ This is an open source project that allows you to provision the necessary infras
 
 You have the option to automatically run PII (Personal Identifiable Information) detection jobs when a new audio file is inserted in S3, or automatically, trigger PII analysis jobs using HTTP API for existing objects.
 
-We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) service to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information.
+We leverage on [AWS Transcribe](https://aws.amazon.com/pm/transcribe) service to handle the [detection of PII](https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction.html) information. We also use [Amazon Comprehend](https://aws.amazon.com/comprehend/) to analyze the call sentiment which can be retrieved by calling the analyze API endpoint. Sentiment analisis is disabled by default, and would need to be enabled on your `configs.tf` settings.
 
 If PII is detected, a process will redact and mute the PII information in the original audio file using [FFmpeg](https://www.ffmpeg.org/). You can optionally turn this feature off in the `configs.tf` settings.
 
