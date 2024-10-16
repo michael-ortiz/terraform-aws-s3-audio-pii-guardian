@@ -1,15 +1,17 @@
 import { InvocationType, InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
+import { ComprehendClient, DetectSentimentCommand, DetectSentimentCommandOutput, LanguageCode } from "@aws-sdk/client-comprehend";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NotificationService } from "./NotificationService";
 import { getOriginalObjectKey } from "../utils/Utils";
 import { EventType } from "./TranscribeService";
-import { AnalyzeResponse, ErrorResponse, IdentificationResults, MuteTimestamps } from "../interfaces/Interfaces";
+import { AnalyzeResponse, ErrorResponse, IdentificationResults, MuteTimestamps, IntelligenceResponse } from "../interfaces/Interfaces";
 
 
 export class AnalyzeService {
 
   private readonly s3Client: S3Client;
   private readonly lambdaClient: LambdaClient;
+  private readonly comprehendClient: ComprehendClient;
   private readonly notifications: NotificationService;
 
   constructor() {
@@ -17,6 +19,7 @@ export class AnalyzeService {
     // Initialize clients
     this.s3Client = new S3Client({ region: process.env.AWS_REGION });
     this.lambdaClient = new LambdaClient({ region: process.env.AWS_REGION });
+    this.comprehendClient = new ComprehendClient({ region: process.env.AWS_REGION });
     this.notifications = new NotificationService();
   }
 
@@ -48,14 +51,24 @@ export class AnalyzeService {
         // Call Lambda function to redact PII in the audio recording
         await this.redactAudioRecording(originalObjectKey, this.getPiiIdentificationTimeStamps(parsedBody));
 
-        const response = {
+        const response : AnalyzeResponse = {
           message: "PII detected in call recording.",
           containsPII: true,
           redactOriginalAudio: process.env.OVERWRITE_ORIGINAL_AUDIO === "true",
           audioUri: `s3://${audioBucket}/${originalObjectKey}`,
           transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
           transcriptText: transcriptText,
-          piiIdentifications: this.getTranscriptionPiiIdentificationResults(parsedBody)
+          piiDetections: this.getTranscriptionPiiIdentificationResults(parsedBody)
+        }
+
+        // Analyze sentiment if enabled
+        if (process.env.SENTIMENT_ANALYSIS === "true") {
+          const sentimentResponse = await this.analyzeSentiment(transcriptText, eventType);
+          if (sentimentResponse && sentimentResponse != null) {
+            response["intelligence"] = sentimentResponse;
+          } else {
+            console.log("No sentiment analysis results found");
+          }
         }
         
         await this.notifications.sendWebhookNotification(response);
@@ -163,6 +176,36 @@ export class AnalyzeService {
     }
 
     return results;
+  }
+
+  async analyzeSentiment(transcriptText: string, eventType: EventType): Promise<IntelligenceResponse | null> {
+
+    if (eventType === EventType.S3) {
+      console.log("Skipping sentiment analysis for S3 event");
+      return null;
+    }
+
+    try {
+      const params = {
+        Text: transcriptText,
+        LanguageCode: LanguageCode.EN
+      };
+
+      const sentimentResponse = await this.comprehendClient.send(new DetectSentimentCommand(params));
+
+      return {
+        sentiment: sentimentResponse.Sentiment!,
+        sentimentScore: sentimentResponse.SentimentScore!
+      }
+
+    } catch (error) {
+      console.error({
+        message: "Error analyzing sentiment",
+        error
+      });
+
+      return null;
+    }
   }
 }
 

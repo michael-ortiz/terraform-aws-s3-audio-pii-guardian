@@ -2,8 +2,8 @@ import express, { Request, Response } from 'express';
 import ServerlessHttp from 'serverless-http';
 import { AnalyzeService } from './services/AnalyzeService';
 import { EventType, TranscribeService } from './services/TranscribeService';
-import { APIGatewayEvent, S3EventRecord } from 'aws-lambda';
-import { shouldTranscribeBasedOnProbability } from './utils/Utils';
+import { S3EventRecord } from 'aws-lambda';
+import { shouldSkipTranscription } from './utils/Utils';
 
 const app = express();
 app.use(express.json())
@@ -49,9 +49,9 @@ const s3EventHandler = async (records: S3EventRecord[]) => {
     // Audio Put S3 Event
     if (record.s3.bucket.name == process.env.AUDIO_BUCKET) {
 
-      if (shouldTranscribeBasedOnProbability(Number(process.env.TRANSCRIBE_PROBABILITY!))) {
+      if (!shouldSkipTranscription(Number(process.env.TRANSCRIBE_PROBABILITY!))) {
         const response = {
-          event: "SKIPPED_TRANSCRIPTION",
+          event: "PROBABILITY_SKIP_TRANSCRIPTION_S3_EVENT",
           objectKey,
           message: "Will not trigger transcription job based on the probability."
         }

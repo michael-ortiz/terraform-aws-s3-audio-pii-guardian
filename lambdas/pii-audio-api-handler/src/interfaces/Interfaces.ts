@@ -1,3 +1,5 @@
+import { SentimentScore, SentimentType } from "@aws-sdk/client-comprehend"
+
 export interface AnalyzeResponse {
   message: string,
   containsPII: boolean,
@@ -5,7 +7,8 @@ export interface AnalyzeResponse {
   audioUri: string,
   transcriptUri?: string,
   transcriptText?: string,
-  piiIdentifications?: any[]
+  piiDetections?: any[]
+  intelligence?: IntelligenceResponse
 }
 
 export interface ErrorResponse {
@@ -39,4 +42,9 @@ export interface Jobs {
 export interface TranscriptionResponse {
   startedJobs: Jobs[],
   jobErrors: Jobs[]
+}
+
+export interface IntelligenceResponse {
+  sentiment?: SentimentType,
+  sentimentScore?: SentimentScore
 }

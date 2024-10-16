@@ -208,7 +208,7 @@ https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
     "audioUri": "s3://audio-bucket-####/{S3_OBJECT_KEY}",
     "transcriptUri": "s3://audio-transcriptions-bucket-####/{S3_OBJECT_KEY}",
     "transcriptText": "Hello, my name is [PII]. Uh This is a test uh testing uh test card information. My credit card number is [PII] [PII]. My social security is [PII]. This is test data.",
-    "piiIdentifications": [
+    "piiDetections": [
         {
             "type": "[PII]",
             "start_time": "2.43",

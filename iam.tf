@@ -38,7 +38,7 @@ resource "aws_iam_policy" "pii_audio_api_handler_function" {
         Effect = "Allow",
         Resource = [
           aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn,
-          "${aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn}/*",
+          "${aws_cloudwatch_log_group.pii_audio_api_handler_log_group.arn}:*",
         ]
       },
       {
@@ -88,6 +88,26 @@ resource "aws_iam_policy" "pii_audio_api_handler_invoke_function" {
   })
 }
 
+resource "aws_iam_policy" "pii_audio_api_handler_comprehend_policy" {
+  count       = var.sentiment_analysis ? 1 : 0
+  name        = "${local.api_handler_function_name}-comprehend-policy"
+  description = "Policy to allow invoking the Comprehend service"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "comprehend:DetectSentiment"
+        ],
+        Effect = "Allow",
+        Resource = [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
   name        = "${local.redactor_function_name}-policy"
   description = "Default policy for the redact PII audio recording lambda"
@@ -103,7 +123,7 @@ resource "aws_iam_policy" "redact_pii_audio_recording_lambda" {
         Effect = "Allow",
         Resource = [
           aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn,
-          "${aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn}/*"
+          "${aws_cloudwatch_log_group.pii_audio_redactor_log_group.arn}:*"
         ]
       },
       {
@@ -136,4 +156,10 @@ resource "aws_iam_role_policy_attachment" "invoke_lambda_policy_attachment" {
 resource "aws_iam_role_policy_attachment" "redact_pii_audio_recording_lambda" {
   role       = aws_iam_role.redact_pii_audio_recording_lambda.name
   policy_arn = aws_iam_policy.redact_pii_audio_recording_lambda.arn
+}
+
+resource "aws_iam_role_policy_attachment" "comprehend_policy_attachment" {
+  count      = var.sentiment_analysis ? 1 : 0
+  role       = aws_iam_role.pii_audio_api_handler_function.name
+  policy_arn = aws_iam_policy.pii_audio_api_handler_comprehend_policy[0].arn
 }

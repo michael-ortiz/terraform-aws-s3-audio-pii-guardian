@@ -6,6 +6,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
+    "@aws-sdk/client-comprehend": "^3.670.0",
     "@aws-sdk/client-lambda": "^3.670.0",
     "@aws-sdk/client-s3": "^3.670.0",
     "@aws-sdk/client-transcribe": "^3.670.0",

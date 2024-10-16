@@ -37,6 +37,7 @@ resource "aws_lambda_function" "pii_audio_api_handler_function" {
       AWS_TRANSCRIBE_REDACTED_PII_TAG = "[PII]" // This is the tag that is used if any PII is found in the transcription. Do not change this value
       REDACT_AUDIO                    = var.redact_audio
       OVERWRITE_ORIGINAL_AUDIO        = var.overwrite_original_audio
+      SENTIMENT_ANALYSIS              = var.sentiment_analysis
 
       // Lambda function names
       REDACTOR_FUNCTION_NAME = local.redactor_function_name
@@ -76,11 +77,11 @@ resource "aws_lambda_function" "pii_audio_redactor_function" {
 ## Log Groups
 
 resource "aws_cloudwatch_log_group" "pii_audio_api_handler_log_group" {
-  name              = "/aws/lambda/${local.api_handler_function_name}"
+  name = "/aws/lambda/${local.api_handler_function_name}"
 }
 
 resource "aws_cloudwatch_log_group" "pii_audio_redactor_log_group" {
-  name              = "/aws/lambda/${local.redactor_function_name}"
+  name = "/aws/lambda/${local.redactor_function_name}"
 }
 
 ## Lambda Permissions
@@ -103,7 +104,7 @@ resource "aws_lambda_permission" "s3_recordings_transcriptions_trigger_permissio
 
 // Function URL
 resource "aws_lambda_function_url" "pii_audio_api_handler_function" {
-  count = var.create_api_endpoint ? 1 : 0
+  count              = var.create_api_endpoint ? 1 : 0
   function_name      = aws_lambda_function.pii_audio_api_handler_function.function_name
   authorization_type = var.api_authorization_type
 }
@@ -125,10 +126,11 @@ data "archive_file" "lambda_zip_api_handler" {
   type        = "zip"
   output_path = "${local.pii_audio_api_handler_function_path}/${local.lambda_zip_file_name}"
   source_dir  = local.pii_audio_api_handler_function_path
-  depends_on  = [null_resource.build_package_lambdas]
   excludes = [
     local.lambda_zip_file_name
   ]
+
+  depends_on = [null_resource.build_package_lambdas]
 }
 
 data "archive_file" "lambda_zip_redactor" {
@@ -144,6 +146,10 @@ data "archive_file" "lambda_zip_redactor" {
 resource "null_resource" "build_package_lambdas" {
   provisioner "local-exec" {
     command = "cd ${path.module} && make install-lambdas-dependencies && make build-lambdas"
+  }
+
+  triggers = {
+    src_hash = sha1(join("", [for f in fileset("${path.cwd}/lambdas", "**"): filesha1("${path.cwd}/lambdas/${f}")]))
   }
 }
 
