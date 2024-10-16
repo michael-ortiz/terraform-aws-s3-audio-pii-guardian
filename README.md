@@ -71,16 +71,9 @@ This is a Terraform project that you can use and test out on your own.
 
 Be sure to have [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) and [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed.
 
-To deploy the infrastructure, run:
-
-```sh
-terraform init
-terraform apply
-```
-
 ## Deploy Using a Terraform Module
 
-If you prefer to deploy the infrastrcuture using a standalone module, you can use our [Public Terraform Module](https://registry.terraform.io/modules/michael-ortiz/s3-audio-pii-guardian/aws/latest), and optionally pass any configurations.
+The easiest way to deploy this project is to use our [Public Terraform Module](https://registry.terraform.io/modules/michael-ortiz/s3-audio-pii-guardian/aws/latest), and optionally pass any configurations:
 
 ```
 module "s3-audio-pii-guardian" {
@@ -116,6 +109,29 @@ module "s3-audio-pii-guardian" {
 }
 
 ```
+
+## Standard Deployment
+
+Clone the the repository:
+
+```
+git clone https://github.com/michael-ortiz/terraform-aws-s3-audio-pii-guardian
+```
+
+Next, open repository folder in your favorite IDE. 
+
+To deploy infrasctructure, execute the following commands:
+
+```sh
+terraform init
+terraform apply
+```
+
+Wait for everything to deploy.
+
+# Testing Project 🧪
+
+To test that the project is working, upload an audio recording with any of the PII entities that you would like to detact and redact to the S3 Audio bucket `audio-bucket-{AWS_ACCOUNT_ID}`. Wait some seconds or minutes while AWS Transcribes the job. Next refresh the bucket and you should see a `{AUDIO_FILE_NAME}-redacted.${EXTENSION}` file with the redacted audio. You can optionally configure to redact the original audio in the `configs.tf` variables. If you want to take a look at analysis result, use the API `/analyze` endpoint.
 
 # Modifying Lambdas 📝
 
