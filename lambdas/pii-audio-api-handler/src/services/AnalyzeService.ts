@@ -29,15 +29,13 @@ export class AnalyzeService {
     const audioBucket = process.env.AUDIO_BUCKET!;
     const originalObjectKey = getOriginalObjectKey(s3ObjectKey);
 
-    const params = {
-      Bucket: transcriptionsBucket,
-      Key: eventType === EventType.S3 ? s3ObjectKey : `redacted-${s3ObjectKey}.json`
-    };
-
     try {
 
-      // Get the transcription from S3
-      const s3Transcript = await this.s3Client.send(new GetObjectCommand(params));
+      // Get the transcription and PII detection data from S3
+      const s3Transcript = await this.s3Client.send(new GetObjectCommand({
+        Bucket: transcriptionsBucket,
+        Key: eventType === EventType.S3 ? s3ObjectKey : `redacted-${s3ObjectKey}.json`
+      }));
 
       if (!s3Transcript) {
         throw { message: "No object key found" };
