@@ -80,6 +80,9 @@ module "s3-audio-pii-guardian" {
   source  = "michael-ortiz/s3-audio-pii-guardian/aws"
   version = "~> 1.0.0"
 
+  # Change this to your audio file format:
+  media_format = "wav"
+
   audio_bucket_name                   = "audio-bucket"
   transcriptions_bucket_name          = "transcriptions-bucket"
   auto_transcribe_on_s3_put           = true
@@ -87,7 +90,6 @@ module "s3-audio-pii-guardian" {
   redact_audio                        = true
   overwrite_original_audio            = false
   default_language_code               = "en-US"
-  media_format                        = "wav"
   transcriptions_file_suffix          = ".json"
   notification_webhook_url            = ""
   slack_notification_webhook_url      = ""
@@ -118,9 +120,9 @@ Clone the the repository:
 git clone https://github.com/michael-ortiz/terraform-aws-s3-audio-pii-guardian
 ```
 
-Next, open repository folder in your favorite IDE. 
+Next, open the repository folder in your favorite IDE. Configure your settings in `configs.tf`, and specially make sure that `media_format` matches the file extension you will be uploading.
 
-To deploy infrasctructure, execute the following commands:
+To deploy infrastructure, execute the following commands:
 
 ```sh
 terraform init
@@ -285,3 +287,5 @@ See [AWS S3 Pricing](https://aws.amazon.com/s3/pricing/)
 ## Lambda Pricing
 
 See [AWS Lambda Pricing](https://aws.amazon.com/lambda/pricing/)
+
+
