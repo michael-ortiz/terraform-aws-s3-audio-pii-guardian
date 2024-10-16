@@ -36,43 +36,44 @@ export class AnalyzeService {
 
     try {
 
-      const transcriptResponse = await this.s3Client.send(new GetObjectCommand(params));
+      // Get the transcription from S3
+      const s3Transcript = await this.s3Client.send(new GetObjectCommand(params));
 
-      if (!transcriptResponse) {
+      if (!s3Transcript) {
         throw { message: "No object key found" };
       }
 
-      const parsedBody = JSON.parse(await this.streamToString(transcriptResponse.Body));
-      const transcriptText = parsedBody.results.transcripts[0].transcript;
+      const s3TranscriptBody = JSON.parse(await this.streamToString(s3Transcript.Body));
+      const transcriptText = s3TranscriptBody.results.transcripts[0].transcript;
 
       // Check if the transcription contains the redacted PII tag
       if (transcriptText.includes(process.env.AWS_TRANSCRIBE_REDACTED_PII_TAG!)) {
 
-        // Call Lambda function to redact PII in the audio recording
-        await this.redactAudioRecording(originalObjectKey, this.getPiiIdentificationTimeStamps(parsedBody));
-
-        const response : AnalyzeResponse = {
-          message: "PII detected in call recording.",
+        const response: AnalyzeResponse = {
+          message: "Analysis complete",
           containsPII: true,
           redactOriginalAudio: process.env.OVERWRITE_ORIGINAL_AUDIO === "true",
           audioUri: `s3://${audioBucket}/${originalObjectKey}`,
           transcriptUri: `s3://${transcriptionsBucket}/${s3ObjectKey}`,
           transcriptText: transcriptText,
-          piiDetections: this.getTranscriptionPiiIdentificationResults(parsedBody)
+          piiDetections: this.getTranscriptionPiiIdentificationResults(s3TranscriptBody)
         }
 
-        // Analyze sentiment if enabled
-        if (process.env.SENTIMENT_ANALYSIS === "true") {
-          const sentimentResponse = await this.analyzeSentiment(transcriptText, eventType);
-          if (sentimentResponse && sentimentResponse != null) {
-            response["intelligence"] = sentimentResponse;
-          } else {
-            console.log("No sentiment analysis results found");
-          }
+        // Analyze sentiment if the event type is from the API
+        const sentiment = await this.analyzeSentiment(transcriptText, eventType);
+        if (sentiment && sentiment != null) {
+          response["intelligence"] = sentiment;
         }
-        
-        await this.notifications.sendWebhookNotification(response);
-        await this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
+
+        // Only trigger redaction and notification if the event type is from S3
+        if (eventType === EventType.S3) {
+          // Call Lambda function to redact PII in the audio recording
+          await this.redactAudioRecording(originalObjectKey, this.getPiiDetectionsEventsTimeStamps(s3TranscriptBody));
+
+          // Send notifications automatically
+          await this.notifications.sendWebhookNotification(response);
+          await this.notifications.sendSlackNotification(s3ObjectKey, transcriptionsBucket);
+        }
 
         return response;
       }
@@ -95,7 +96,7 @@ export class AnalyzeService {
   private async redactAudioRecording(s3ObjectKey: string, muteTimeStamps: any): Promise<void> {
 
     if (process.env.REDACT_AUDIO !== "true") {
-      console.log("Redact audio is disabled. Skipping...");
+      console.log("Audio redaction is disabled. Skipping...");
       return;
     }
 
@@ -108,7 +109,7 @@ export class AnalyzeService {
       })
     };
 
-    try { 
+    try {
       // Invoke the lambda function
       console.log("Calling Redact Audio Processor Lambda...");
       await this.lambdaClient.send(new InvokeCommand(lambdaParams));
@@ -130,7 +131,7 @@ export class AnalyzeService {
     });
   }
 
-  private getPiiIdentificationTimeStamps(data: any): MuteTimestamps[] {
+  private getPiiDetectionsEventsTimeStamps(data: any): MuteTimestamps[] {
 
     if (data.results.items.length === 0) {
       return [];
@@ -180,8 +181,13 @@ export class AnalyzeService {
 
   async analyzeSentiment(transcriptText: string, eventType: EventType): Promise<IntelligenceResponse | null> {
 
+    if (process.env.SENTIMENT_ANALYSIS === "false") {
+      console.log("Sentiment analysis is disabled. Skipping...");
+      return null;
+    }
+
     if (eventType === EventType.S3) {
-      console.log("Skipping sentiment analysis for S3 event");
+      console.log("Skipping sentiment analysis for S3 event. Only analyzing for API events");
       return null;
     }
 
