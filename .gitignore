@@ -3,7 +3,7 @@ node_modules
 .DS_Store
 terraform.tfstate
 terraform.tfstate.backup
-docs
+docs/*.js
 dist
 lambda.zip
 layer
