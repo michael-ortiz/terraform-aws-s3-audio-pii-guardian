@@ -138,12 +138,9 @@ To test that the project is working, upload an audio recording with any of the P
 
 # Modifying Lambdas 📝
 
-You can optionally modify the lambdas to your needs. 
-
-To build and deploy a lambda, execute the following commands:
+You can optionally modify the lambdas to your needs. Simply make a change to the codebase, and Terraform will detect these changes and make a new build automtically.
 
 ```
-make build-lambdas
 terraform apply
 ```
 
@@ -202,64 +199,71 @@ https://{ID}.lambda-url.us-east-1.on.aws/analyze/{S3_OBJECT_KEY}
 
 ```
 {
+  "message": "PII detected in call recording.",
+  "containsPII": true,
+  "redactOriginalAudio": true,
+  "audioUri": "s3://audio-bucket-####/{S3_OBJECT_KEY}",
+  "transcriptUri": "s3://audio-transcriptions-bucket-####/{S3_OBJECT_KEY}",
+  "transcriptText": "Hello, my name is [PII]. Uh This is a test uh testing uh test card information. My credit card number is [PII] [PII]. My social security is [PII]. This is test data.",
+  "piiDetections": [
     {
-    "message": "PII detected in call recording.",
-    "containsPII": true,
-    "redactOriginalAudio": true,
-    "audioUri": "s3://audio-bucket-####/{S3_OBJECT_KEY}",
-    "transcriptUri": "s3://audio-transcriptions-bucket-####/{S3_OBJECT_KEY}",
-    "transcriptText": "Hello, my name is [PII]. Uh This is a test uh testing uh test card information. My credit card number is [PII] [PII]. My social security is [PII]. This is test data.",
-    "piiDetections": [
+      "type": "[PII]",
+      "start_time": "2.43",
+      "end_time": "2.93",
+      "redactions": [
         {
-            "type": "[PII]",
-            "start_time": "2.43",
-            "end_time": "2.93",
-            "redactions": [
-                {
-                    "confidence": "1.0",
-                    "type": "NAME",
-                    "category": "PII"
-                }
-            ]
-        },
-        {
-            "type": "[PII]",
-            "start_time": "11.55",
-            "end_time": "13.569",
-            "redactions": [
-                {
-                    "confidence": "0.9994",
-                    "type": "CREDIT_DEBIT_NUMBER",
-                    "category": "PII"
-                }
-            ]
-        },
-        {
-            "type": "[PII]",
-            "start_time": "14.439",
-            "end_time": "19.729",
-            "redactions": [
-                {
-                    "confidence": "0.9994",
-                    "type": "CREDIT_DEBIT_NUMBER",
-                    "category": "PII"
-                }
-            ]
-        },
-        {
-            "type": "[PII]",
-            "start_time": "22.36",
-            "end_time": "27.129",
-            "redactions": [
-                {
-                    "confidence": "0.9999",
-                    "type": "SSN",
-                    "category": "PII"
-                }
-            ]
+          "confidence": "1.0",
+          "type": "NAME",
+          "category": "PII"
         }
-    ]
-}
+      ]
+    },
+    {
+      "type": "[PII]",
+      "start_time": "11.55",
+      "end_time": "13.569",
+      "redactions": [
+        {
+          "confidence": "0.9994",
+          "type": "CREDIT_DEBIT_NUMBER",
+          "category": "PII"
+        }
+      ]
+    },
+    {
+      "type": "[PII]",
+      "start_time": "14.439",
+      "end_time": "19.729",
+      "redactions": [
+        {
+          "confidence": "0.9994",
+          "type": "CREDIT_DEBIT_NUMBER",
+          "category": "PII"
+        }
+      ]
+    },
+    {
+      "type": "[PII]",
+      "start_time": "22.36",
+      "end_time": "27.129",
+      "redactions": [
+        {
+          "confidence": "0.9999",
+          "type": "SSN",
+          "category": "PII"
+        }
+      ]
+    }
+  ],
+  "intelligence": {
+    "sentiment": "NEUTRAL",
+    "sentimentScore": {
+      "Mixed": 0.000010112761628988665,
+      "Negative": 0.00010839156311703846,
+      "Neutral": 0.9996304512023926,
+      "Positive": 0.00025106221437454224
+    }
+  }
 }
 ```
 
