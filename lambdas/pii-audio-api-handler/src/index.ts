@@ -49,7 +49,7 @@ const s3EventHandler = async (records: S3EventRecord[]) => {
     // Audio Put S3 Event
     if (record.s3.bucket.name == process.env.AUDIO_BUCKET) {
 
-      if (!shouldSkipTranscription(Number(process.env.TRANSCRIBE_PROBABILITY!))) {
+      if (shouldSkipTranscription(Number(process.env.TRANSCRIBE_PROBABILITY!))) {
         const response = {
           event: "PROBABILITY_SKIP_TRANSCRIPTION_S3_EVENT",
           objectKey,

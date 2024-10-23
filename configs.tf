@@ -100,5 +100,5 @@ variable "api_authorization_type" {
 variable "sentiment_analysis" {
   description = "Enable sentiment analysis on the transcriptions using Amazon Comprehend. This will incur additional costs"
   type        = bool
-  default     = false
+  default     = true
 }
